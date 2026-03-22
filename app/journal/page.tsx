@@ -1,325 +1,224 @@
 'use client';
-import './patterns.css';
+import './journal.css';
 import { useState } from 'react';
 
-const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const TRIGGERS = ['Period', 'Ovulation', 'Exercise', 'Stress', 'Food', 'Sex', 'Bowel', 'Urination', 'Standing', 'Sitting'];
+const SYMPTOMS = ['Cramping', 'Bloating', 'Back Pain', 'Nausea', 'Fatigue', 'Headache', 'Spotting', 'Stabbing Pain', 'Pressure', 'Burning'];
+const MOODS = ['😔', '😐', '😤', '😰', '😢', '🙂', '😊'];
+const MOOD_LABELS = ['Very Low', 'Neutral', 'Frustrated', 'Anxious', 'Sad', 'Okay', 'Good'];
 
-function getDaysInMonth(year: number, month: number) {
-  return new Date(year, month + 1, 0).getDate();
-}
+export default function Journal() {
+  const [pain, setPain] = useState(0);
+  const [mood, setMood] = useState<number | null>(null);
+  const [triggers, setTriggers] = useState<string[]>([]);
+  const [symptoms, setSymptoms] = useState<string[]>([]);
+  const [note, setNote] = useState('');
+  const [submitted, setSubmitted] = useState(false);
+  const [step, setStep] = useState(1);
 
-function getFirstDayOfMonth(year: number, month: number) {
-  return new Date(year, month, 1).getDay();
-}
-
-export default function Patterns() {
-  const today = new Date();
-  const [viewMonth, setViewMonth] = useState(today.getMonth());
-  const [viewYear, setViewYear]   = useState(today.getFullYear());
-  const [periodStart, setPeriodStart] = useState<string | null>(null);
-  const [periodLength, setPeriodLength] = useState(5);
-  const [cycleLength, setCycleLength]   = useState(28);
-  const [loggedDays, setLoggedDays]     = useState<string[]>([]);
-  const [hoveredDay, setHoveredDay]     = useState<number | null>(null);
-  const [bunnyPos, setBunnyPos]         = useState<number | null>(null);
-  const [showSetup, setShowSetup]       = useState(false);
-
-  const daysInMonth  = getDaysInMonth(viewYear, viewMonth);
-  const firstDaySlot = getFirstDayOfMonth(viewYear, viewMonth);
-
-  // Build period ranges from start date
-  const getPeriodDays = (): Set<string> => {
-    const days = new Set<string>();
-    if (!periodStart) return days;
-    const start = new Date(periodStart);
-    for (let i = 0; i < periodLength; i++) {
-      const d = new Date(start);
-      d.setDate(start.getDate() + i);
-      days.add(d.toISOString().split('T')[0]);
-    }
-    return days;
+  const toggleItem = (item: string, list: string[], setList: (v: string[]) => void) => {
+    setList(list.includes(item) ? list.filter(i => i !== item) : [...list, item]);
   };
 
-  // Build estimated future cycles
-  const getEstimatedDays = (): Set<string> => {
-    const days = new Set<string>();
-    if (!periodStart) return days;
-    const start = new Date(periodStart);
-    for (let cycle = 1; cycle <= 3; cycle++) {
-      const cycleStart = new Date(start);
-      cycleStart.setDate(start.getDate() + cycleLength * cycle);
-      for (let i = 0; i < periodLength; i++) {
-        const d = new Date(cycleStart);
-        d.setDate(cycleStart.getDate() + i);
-        days.add(d.toISOString().split('T')[0]);
-      }
-    }
-    return days;
+  const handleSubmit = () => {
+    setSubmitted(true);
+    setTimeout(() => setSubmitted(false), 3000);
+    setPain(0); setMood(null); setTriggers([]); setSymptoms([]); setNote(''); setStep(1);
   };
 
-  // Ovulation window (14 days before next period)
-  const getOvulationDays = (): Set<string> => {
-    const days = new Set<string>();
-    if (!periodStart) return days;
-    const start = new Date(periodStart);
-    const ovStart = new Date(start);
-    ovStart.setDate(start.getDate() + cycleLength - 16);
-    for (let i = 0; i < 5; i++) {
-      const d = new Date(ovStart);
-      d.setDate(ovStart.getDate() + i);
-      days.add(d.toISOString().split('T')[0]);
-    }
-    return days;
-  };
-
-  const periodDays    = getPeriodDays();
-  const estimatedDays = getEstimatedDays();
-  const ovulationDays = getOvulationDays();
-
-  const toKey = (day: number) =>
-    `${viewYear}-${String(viewMonth + 1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-
-  const toggleLog = (day: number) => {
-    const key = toKey(day);
-    setLoggedDays(prev => prev.includes(key) ? prev.filter(d => d !== key) : [...prev, key]);
-  };
-
-  const prevMonth = () => {
-    if (viewMonth === 0) { setViewMonth(11); setViewYear(y => y - 1); }
-    else setViewMonth(m => m - 1);
-  };
-
-  const nextMonth = () => {
-    if (viewMonth === 11) { setViewMonth(0); setViewYear(y => y + 1); }
-    else setViewMonth(m => m + 1);
-  };
-
-  // Bunny animation: which day in the period range is it jumping to
-  const getBunnyDay = (): number | null => {
-    if (!periodStart) return null;
-    const start = new Date(periodStart);
-    const startMonth = start.getMonth();
-    const startYear  = start.getFullYear();
-    if (startMonth !== viewMonth || startYear !== viewYear) return null;
-    // animate bunny to end of period
-    return start.getDate() + periodLength - 1;
-  };
-
-  const bunnyEndDay = getBunnyDay();
-  const periodStartDay = periodStart ? new Date(periodStart).getDate() : null;
-
-  // Stats
-  const totalLogged = loggedDays.length;
-  const nextPeriod  = periodStart
-    ? (() => {
-        const s = new Date(periodStart);
-        s.setDate(s.getDate() + cycleLength);
-        return s.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-      })()
-    : '—';
+  const painColor = pain <= 3 ? '#4ade80' : pain <= 6 ? '#fb923c' : '#f43f5e';
+  const painLabel = pain === 0 ? 'No Pain' : pain <= 3 ? 'Mild' : pain <= 6 ? 'Moderate' : pain <= 8 ? 'Severe' : 'Unbearable';
 
   return (
     <div className="page">
       <nav className="nav">
         <div className="nav-inner">
           <a href="/" className="nav-logo">🌸 EndoTrack</a>
-          {['Home','Journal','Patterns','Insights','Report'].map(l => (
+          {['Home', 'Journal', 'Patterns', 'Insights', 'Report'].map(l => (
             <a key={l} href={`/${l === 'Home' ? '' : l.toLowerCase()}`}
-              className={`nav-link ${l === 'Patterns' ? 'nav-link-active' : ''}`}>{l}</a>
+              className={`nav-link ${l === 'Journal' ? 'nav-link-active' : ''}`}>{l}</a>
           ))}
           <a href="/journal" className="btn-primary">+ Log Symptom</a>
         </div>
       </nav>
 
-      <div className="p-container">
+      <div className="j-container">
 
-        {/* Header */}
-        <div className="p-header">
+        <div className="j-header">
           <div>
-            <h1 className="p-title">Pattern Pulse 🐰</h1>
-            <p className="p-sub">Track your cycle, spot patterns, predict what's next.</p>
+            <p className="j-date">{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</p>
+            <h1 className="j-title">How are you feeling?</h1>
           </div>
-          <button className="p-setup-btn" onClick={() => setShowSetup(s => !s)}>
-            ⚙️ Cycle Setup
-          </button>
+          <div className="j-streak">
+            <span className="j-streak-num">🔥 3</span>
+            <span className="j-streak-label">day streak</span>
+          </div>
         </div>
 
-        {/* Setup Panel */}
-        {showSetup && (
-          <div className="p-setup-card p-animate">
-            <h2 className="p-setup-title">🌸 Cycle Settings</h2>
-            <div className="p-setup-grid">
-              <div className="p-setup-field">
-                <label className="p-setup-label">Period Start Date</label>
-                <input type="date" className="p-setup-input"
-                  value={periodStart || ''}
-                  onChange={e => setPeriodStart(e.target.value)} />
+        <div className="j-steps">
+          {['Pain', 'Mood', 'Symptoms', 'Note'].map((s, i) => (
+            <div key={s} className="j-step-item" onClick={() => setStep(i + 1)}>
+              <div className={`j-step-circle ${step === i + 1 ? 'j-step-active' : step > i + 1 ? 'j-step-done' : ''}`}>
+                {step > i + 1 ? '✓' : i + 1}
               </div>
-              <div className="p-setup-field">
-                <label className="p-setup-label">Period Length (days)</label>
-                <div className="p-stepper">
-                  <button onClick={() => setPeriodLength(l => Math.max(1, l - 1))}>−</button>
-                  <span>{periodLength} days</span>
-                  <button onClick={() => setPeriodLength(l => Math.min(10, l + 1))}>+</button>
-                </div>
-              </div>
-              <div className="p-setup-field">
-                <label className="p-setup-label">Cycle Length (days)</label>
-                <div className="p-stepper">
-                  <button onClick={() => setCycleLength(l => Math.max(20, l - 1))}>−</button>
-                  <span>{cycleLength} days</span>
-                  <button onClick={() => setCycleLength(l => Math.min(40, l + 1))}>+</button>
-                </div>
+              <span className={`j-step-label ${step === i + 1 ? 'j-step-label-active' : ''}`}>{s}</span>
+            </div>
+          ))}
+          <div className="j-step-line" />
+        </div>
+
+        {step === 1 && (
+          <div className="j-card j-animate">
+            <div className="j-card-header">
+              <div className="j-card-icon" style={{ background: '#fff0f3' }}>🌡️</div>
+              <div>
+                <h2 className="j-card-title">Pain Level</h2>
+                <p className="j-card-sub">Drag to set your current pain intensity</p>
               </div>
             </div>
-            <button className="p-setup-save" onClick={() => setShowSetup(false)}>
-              Save & Close ✓
-            </button>
+            <div className="j-pain-display">
+              <div className="j-pain-number" style={{ color: painColor }}>{pain}</div>
+              <div className="j-pain-label" style={{ color: painColor }}>{painLabel}</div>
+            </div>
+            <div className="j-slider-wrap">
+              <input type="range" min={0} max={10} value={pain}
+                onChange={e => setPain(Number(e.target.value))}
+                className="j-slider" />
+              <div className="j-slider-ticks">
+                {[0,1,2,3,4,5,6,7,8,9,10].map(n => (
+                  <span key={n} className={`j-tick ${n <= pain ? 'j-tick-active' : ''}`}
+                    style={{ color: n <= pain ? painColor : undefined }}>{n}</span>
+                ))}
+              </div>
+            </div>
+            <div className="j-pain-scale">
+              {[
+                { range: '0–2', label: 'Mild',        color: '#4ade80', bg: '#f0fdf4' },
+                { range: '3–5', label: 'Moderate',    color: '#fb923c', bg: '#fff7ed' },
+                { range: '6–8', label: 'Severe',      color: '#f43f5e', bg: '#fff1f2' },
+                { range: '9–10', label: 'Unbearable', color: '#be123c', bg: '#ffe4e6' },
+              ].map(p => (
+                <div key={p.label} className="j-pain-ref" style={{ background: p.bg }}>
+                  <span className="j-pain-ref-range" style={{ color: p.color }}>{p.range}</span>
+                  <span className="j-pain-ref-label">{p.label}</span>
+                </div>
+              ))}
+            </div>
+            <button className="j-next-btn" onClick={() => setStep(2)}>Continue → Mood</button>
           </div>
         )}
 
-        {/* Stats Row */}
-        <div className="p-stats">
-          {[
-            { icon: '🐰', label: 'Days Logged',   value: totalLogged },
-            { icon: '📅', label: 'Next Period',    value: nextPeriod },
-            { icon: '🔄', label: 'Cycle Length',   value: `${cycleLength}d` },
-            { icon: '🌸', label: 'Period Length',  value: `${periodLength}d` },
-          ].map(s => (
-            <div key={s.label} className="p-stat-card">
-              <span className="p-stat-icon">{s.icon}</span>
-              <span className="p-stat-value">{s.value}</span>
-              <span className="p-stat-label">{s.label}</span>
+        {step === 2 && (
+          <div className="j-card j-animate">
+            <div className="j-card-header">
+              <div className="j-card-icon" style={{ background: '#fdf4ff' }}>💭</div>
+              <div>
+                <h2 className="j-card-title">Mood Check</h2>
+                <p className="j-card-sub">How are you feeling emotionally?</p>
+              </div>
             </div>
-          ))}
-        </div>
-
-        {/* Calendar */}
-        <div className="p-cal-card p-animate">
-
-          {/* Month nav */}
-          <div className="p-cal-nav">
-            <button className="p-cal-arrow" onClick={prevMonth}>‹</button>
-            <h2 className="p-cal-month">{MONTHS[viewMonth]} {viewYear}</h2>
-            <button className="p-cal-arrow" onClick={nextMonth}>›</button>
+            <div className="j-mood-grid">
+              {MOODS.map((m, i) => (
+                <button key={m} onClick={() => setMood(i)}
+                  className={`j-mood-btn ${mood === i ? 'j-mood-selected' : ''}`}>
+                  <span className="j-mood-emoji">{m}</span>
+                  <span className="j-mood-label">{MOOD_LABELS[i]}</span>
+                </button>
+              ))}
+            </div>
+            <div className="j-nav-row">
+              <button className="j-back-btn" onClick={() => setStep(1)}>← Back</button>
+              <button className="j-next-btn" onClick={() => setStep(3)}>Continue → Symptoms</button>
+            </div>
           </div>
+        )}
 
-          {/* Day headers */}
-          <div className="p-cal-grid">
-            {DAYS.map(d => (
-              <div key={d} className="p-cal-day-header">{d}</div>
-            ))}
+        {step === 3 && (
+          <div className="j-card j-animate">
+            <div className="j-card-header">
+              <div className="j-card-icon" style={{ background: '#fff0f3' }}>🔍</div>
+              <div>
+                <h2 className="j-card-title">Symptoms & Triggers</h2>
+                <p className="j-card-sub">Select everything that applies today</p>
+              </div>
+            </div>
+            <p className="j-section-label">Symptoms</p>
+            <div className="j-tag-grid">
+              {SYMPTOMS.map(s => (
+                <button key={s} onClick={() => toggleItem(s, symptoms, setSymptoms)}
+                  className={`j-tag ${symptoms.includes(s) ? 'j-tag-active' : ''}`}>{s}</button>
+              ))}
+            </div>
+            <p className="j-section-label" style={{ marginTop: '1.5rem' }}>Triggers</p>
+            <div className="j-tag-grid">
+              {TRIGGERS.map(t => (
+                <button key={t} onClick={() => toggleItem(t, triggers, setTriggers)}
+                  className={`j-tag ${triggers.includes(t) ? 'j-tag-active' : ''}`}>{t}</button>
+              ))}
+            </div>
+            <div className="j-nav-row" style={{ marginTop: '1.75rem' }}>
+              <button className="j-back-btn" onClick={() => setStep(2)}>← Back</button>
+              <button className="j-next-btn" onClick={() => setStep(4)}>Continue → Note</button>
+            </div>
+          </div>
+        )}
 
-            {/* Empty slots */}
-            {Array.from({ length: firstDaySlot }).map((_, i) => (
-              <div key={`empty-${i}`} />
-            ))}
-
-            {/* Days */}
-            {Array.from({ length: daysInMonth }).map((_, i) => {
-              const day  = i + 1;
-              const key  = toKey(day);
-              const isToday     = day === today.getDate() && viewMonth === today.getMonth() && viewYear === today.getFullYear();
-              const isPeriod    = periodDays.has(key);
-              const isEstimated = estimatedDays.has(key);
-              const isOvulation = ovulationDays.has(key);
-              const isLogged    = loggedDays.includes(key);
-              const isBunnyStart = periodStartDay === day;
-              const isBunnyEnd   = bunnyEndDay === day;
-              const isHovered    = hoveredDay === day;
-
-              return (
-                <div key={day}
-                  className={[
-                    'p-cal-day',
-                    isToday     ? 'p-day-today'     : '',
-                    isPeriod    ? 'p-day-period'    : '',
-                    isEstimated ? 'p-day-estimated' : '',
-                    isOvulation ? 'p-day-ovulation' : '',
-                    isLogged    ? 'p-day-logged'    : '',
-                    isHovered   ? 'p-day-hovered'   : '',
-                  ].join(' ')}
-                  onClick={() => toggleLog(day)}
-                  onMouseEnter={() => setHoveredDay(day)}
-                  onMouseLeave={() => setHoveredDay(null)}
-                >
-                  <span className="p-day-num">{day}</span>
-
-                  {/* Bunny on period start */}
-                  {isBunnyStart && (
-                    <span className="p-bunny p-bunny-start" title="Period starts">🐰</span>
-                  )}
-
-                  {/* Jumping bunny on period end */}
-                  {isBunnyEnd && bunnyEndDay !== periodStartDay && (
-                    <span className="p-bunny p-bunny-jump" title="Estimated end">🐇</span>
-                  )}
-
-                  {/* Logged checkmark bunny */}
-                  {isLogged && !isBunnyStart && (
-                    <span className="p-bunny-check">🐰</span>
-                  )}
-
-                  {/* Ovulation flower */}
-                  {isOvulation && !isPeriod && (
-                    <span className="p-ov-dot" title="Ovulation window">🌸</span>
-                  )}
+        {step === 4 && (
+          <div className="j-card j-animate">
+            <div className="j-card-header">
+              <div className="j-card-icon" style={{ background: '#fff7ed' }}>✍️</div>
+              <div>
+                <h2 className="j-card-title">Add a Note</h2>
+                <p className="j-card-sub">Describe how you feel in your own words</p>
+              </div>
+            </div>
+            <textarea className="j-textarea"
+              placeholder={`e.g. "Sharp pain during my period again, doctor said it's normal but it's getting worse..."`}
+              value={note} onChange={e => setNote(e.target.value)} rows={5} />
+            <div className="j-char-count">{note.length} characters</div>
+            <div className="j-summary">
+              <p className="j-summary-title">Entry Summary</p>
+              <div className="j-summary-grid">
+                <div className="j-summary-item">
+                  <span className="j-summary-key">Pain</span>
+                  <span className="j-summary-val" style={{ color: painColor }}>{pain}/10 — {painLabel}</span>
                 </div>
-              );
-            })}
-          </div>
-
-          {/* Legend */}
-          <div className="p-legend">
-            {[
-              { color: '#fce4ec', border: '#e91e8c', label: 'Period' },
-              { color: '#ffeef8', border: '#f9a8d4', label: 'Estimated' },
-              { color: '#fef9c3', border: '#fbbf24', label: 'Ovulation' },
-              { color: '#f0fdf4', border: '#4ade80', label: 'Logged' },
-            ].map(l => (
-              <div key={l.label} className="p-legend-item">
-                <div className="p-legend-dot" style={{ background: l.color, border: `1.5px solid ${l.border}` }} />
-                <span>{l.label}</span>
+                <div className="j-summary-item">
+                  <span className="j-summary-key">Mood</span>
+                  <span className="j-summary-val">{mood !== null ? `${MOODS[mood]} ${MOOD_LABELS[mood]}` : 'Not set'}</span>
+                </div>
+                <div className="j-summary-item">
+                  <span className="j-summary-key">Symptoms</span>
+                  <span className="j-summary-val">{symptoms.length > 0 ? symptoms.join(', ') : 'None selected'}</span>
+                </div>
+                <div className="j-summary-item">
+                  <span className="j-summary-key">Triggers</span>
+                  <span className="j-summary-val">{triggers.length > 0 ? triggers.join(', ') : 'None selected'}</span>
+                </div>
               </div>
-            ))}
-            <div className="p-legend-item"><span>🐰</span><span>Logged day</span></div>
-            <div className="p-legend-item"><span>🐇</span><span>Period end</span></div>
-            <div className="p-legend-item"><span>🌸</span><span>Ovulation</span></div>
+            </div>
+            <div className="j-nav-row">
+              <button className="j-back-btn" onClick={() => setStep(3)}>← Back</button>
+              <button className="j-submit-btn" onClick={handleSubmit}>Save Entry 💾</button>
+            </div>
           </div>
-        </div>
+        )}
 
-        {/* Pattern Pulse Wave */}
-        <div className="p-wave-card">
-          <h2 className="p-wave-title">📊 Pain Intensity Wave</h2>
-          <p className="p-wave-sub">Log entries to see your pattern pulse build over time</p>
-          <div className="p-wave">
-            {[2,4,7,5,8,3,6,9,4,7,5,8,3,6,2,5,8,6,9,4,7,3,5,8,4,6,9,5,7,3].map((h, i) => (
-              <div key={i} className="p-wave-bar"
-                style={{ height: `${h * 8}px`, animationDelay: `${i * 0.05}s` }} />
-            ))}
+        {submitted && (
+          <div className="j-toast">
+            <span>✅</span>
+            <div>
+              <div className="j-toast-title">Entry saved!</div>
+              <div className="j-toast-sub">Your symptom log has been recorded.</div>
+            </div>
           </div>
-          <div className="p-wave-labels">
-            <span>30 days ago</span>
-            <span>Today</span>
-          </div>
-        </div>
+        )}
 
-        {/* Insight Cards */}
-        <div className="p-insights">
-          <h2 className="p-insights-title">🔍 Cycle Insights</h2>
-          <div className="p-insights-grid">
-            {[
-              { icon: '🐰', title: 'Bunny Trail Active', desc: periodStart ? `Your period started ${new Date(periodStart).toLocaleDateString('en-US',{month:'short',day:'numeric'})}. Estimated end in ${periodLength} days.` : 'Set your period start date to activate the bunny trail.', color: '#fff0f3', border: '#fce4ec' },
-              { icon: '📅', title: 'Next Cycle', desc: periodStart ? `Your next period is estimated around ${nextPeriod}. Your cycle is ${cycleLength} days.` : 'Add your cycle data to see predictions.', color: '#fdf4ff', border: '#f5d0fe' },
-              { icon: '🌸', title: 'Ovulation Window', desc: periodStart ? `Your ovulation window is approximately 14 days before your next period.` : 'Set your period start to calculate ovulation.', color: '#fefce8', border: '#fef08a' },
-            ].map(c => (
-              <div key={c.title} className="p-insight-card" style={{ background: c.color, border: `1px solid ${c.border}` }}>
-                <span className="p-insight-icon">{c.icon}</span>
-                <div className="p-insight-title">{c.title}</div>
-                <div className="p-insight-desc">{c.desc}</div>
-              </div>
-            ))}
+        <div>
+          <h2 className="j-past-title">Recent Entries</h2>
+          <div className="j-past-empty">
+            <div className="j-past-empty-icon">📋</div>
+            <p>No entries yet. Start logging to see your history here.</p>
           </div>
         </div>
 
