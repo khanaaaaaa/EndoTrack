@@ -373,7 +373,7 @@
     margin-bottom: 0.75rem;
 }
 
-.j-summary-grid { display: flex; flex-firection: column; gap: 0.5rem; }
+.j-summary-grid { display: flex; flex-direction: column; gap: 0.5rem; }
 
 .j-summary-item {
     display: flex;
