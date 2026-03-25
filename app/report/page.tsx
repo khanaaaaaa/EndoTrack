@@ -39,7 +39,7 @@ export default function Report() {
     <div className="page">
       <nav className="nav">
         <div className="nav-inner">
-          <a href="/" className="nav-logo">🌸 EndoTrack</a>
+          <a href="/" className="nav-logo">EndoTrack</a>
           {['Home','Journal','Patterns','Insights','Report'].map(l => (
             <a key={l} href={`/${l==='Home'?'':l.toLowerCase()}`}
               className={`nav-link ${l==='Report'?'nav-link-active':''}`}>{l}</a>
@@ -61,7 +61,7 @@ export default function Report() {
         {/* Patient Info */}
         <div className="r-card r-animate">
           <div className="r-card-header">
-            <div className="r-card-icon" style={{ background: '#fff0f3' }}>👤</div>
+            <div className="r-card-icon" style={{ background: '#fff0f3' }}>P</div>
             <div>
               <h2 className="r-card-title">Patient Information</h2>
               <p className="r-card-sub">Optional — helps personalize your report</p>
@@ -107,7 +107,7 @@ export default function Report() {
         {/* Pain Timeline Visual */}
         <div className="r-card r-animate">
           <div className="r-card-header">
-            <div className="r-card-icon" style={{ background: '#fff7ed' }}>📊</div>
+            <div className="r-card-icon" style={{ background: '#fff7ed' }}>T</div>
             <div>
               <h2 className="r-card-title">Pain Timeline</h2>
               <p className="r-card-sub">Visual overview of pain intensity over time</p>
@@ -138,7 +138,7 @@ export default function Report() {
         {/* Symptom Frequency */}
         <div className="r-card r-animate">
           <div className="r-card-header">
-            <div className="r-card-icon" style={{ background: '#f5f3ff' }}>🔍</div>
+            <div className="r-card-icon" style={{ background: '#f5f3ff' }}>S</div>
             <div>
               <h2 className="r-card-title">Symptom Frequency</h2>
               <p className="r-card-sub">How often each symptom appeared</p>
@@ -164,7 +164,7 @@ export default function Report() {
         {/* Full Timeline */}
         <div className="r-card r-animate">
           <div className="r-card-header">
-            <div className="r-card-icon" style={{ background: '#fce4ec' }}>📋</div>
+            <div className="r-card-icon" style={{ background: '#fce4ec' }}>L</div>
             <div>
               <h2 className="r-card-title">Full Symptom Log</h2>
               <p className="r-card-sub">{SAMPLE_ENTRIES.length} entries — most recent first</p>
@@ -196,7 +196,7 @@ export default function Report() {
         {/* Generate / Export */}
         <div className="r-export r-animate">
           <div className="r-export-left">
-            <div className="r-export-icon">📄</div>
+            <div className="r-export-icon">R</div>
             <div>
               <div className="r-export-title">Ready to share with your doctor?</div>
               <div className="r-export-sub">Generate a clean summary or copy the full report text.</div>
@@ -204,17 +204,17 @@ export default function Report() {
           </div>
           <div className="r-export-btns">
             <button className="r-copy-btn" onClick={handleCopy}>
-              {copied ? '✓ Copied!' : '📋 Copy Report'}
+              {copied ? 'Copied!' : 'Copy Report'}
             </button>
             <button className="btn-primary r-gen-btn" onClick={handleGenerate}>
-              {generated ? '✓ Report Ready' : '⬇️ Download PDF'}
+              {generated ? 'Report Ready' : 'Download PDF'}
             </button>
           </div>
         </div>
 
         {generated && (
           <div className="r-generated r-animate">
-            <div className="r-gen-icon">✅</div>
+            <div className="r-gen-icon">Done</div>
             <div>
               <div className="r-gen-title">Your report has been generated!</div>
               <div className="r-gen-sub">In a full version this would download as a PDF. For now, use "Copy Report" to paste into any document.</div>
@@ -224,7 +224,6 @@ export default function Report() {
 
         {/* Disclaimer */}
         <div className="r-disclaimer">
-          <span>⚕️</span>
           <p>This report is intended to support conversations with your healthcare provider, not replace medical advice. Always consult a qualified medical professional.</p>
         </div>
 

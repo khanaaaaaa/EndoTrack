@@ -10,7 +10,10 @@ const AFFIRMATIONS = [
 ];
 
 export default function Home() {
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => {
+    if (typeof window !== 'undefined') return !sessionStorage.getItem('splashSeen');
+    return true;
+  });
   const [fadeOut, setFadeOut] = useState(false);
   const [affirmation, setAffirmation] = useState(0);
   const [checkedIn, setCheckedIn] = useState(false);
@@ -18,10 +21,14 @@ export default function Home() {
   const [quickMood, setQuickMood] = useState<number | null>(null);
 
   useEffect(() => {
+    if (!loading) return;
     const fade = setTimeout(() => setFadeOut(true), 3200);
-    const done = setTimeout(() => setLoading(false), 3800);
+    const done = setTimeout(() => {
+      sessionStorage.setItem('splashSeen', '1');
+      setLoading(false);
+    }, 3800);
     return () => { clearTimeout(fade); clearTimeout(done); };
-  }, []);
+  }, [loading]);
 
   useEffect(() => {
     const interval = setInterval(() => {

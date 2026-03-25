@@ -131,7 +131,7 @@ export default function Patterns() {
     <div className="page">
       <nav className="nav">
         <div className="nav-inner">
-          <a href="/" className="nav-logo">🌸 EndoTrack</a>
+          <a href="/" className="nav-logo">EndoTrack</a>
           {['Home','Journal','Patterns','Insights','Report'].map(l => (
             <a key={l} href={`/${l==='Home'?'':l.toLowerCase()}`}
               className={`nav-link ${l==='Patterns'?'nav-link-active':''}`}>{l}</a>
@@ -147,12 +147,12 @@ export default function Patterns() {
             <h1 className="p-title">Pattern Pulse</h1>
             <p className="p-sub">Track your cycle, spot patterns, predict what&apos;s next.</p>
           </div>
-          <button className="p-setup-btn" onClick={() => setShowSetup(s => !s)}>⚙️ Cycle Setup</button>
+          <button className="p-setup-btn" onClick={() => setShowSetup(s => !s)}>Cycle Setup</button>
         </div>
 
         {showSetup && (
           <div className="p-setup-card p-animate">
-            <h2 className="p-setup-title">🌸 Cycle Settings</h2>
+            <h2 className="p-setup-title">Cycle Settings</h2>
             <div className="p-setup-grid">
               <div className="p-setup-field">
                 <label className="p-setup-label">Period Start Date</label>
@@ -176,19 +176,18 @@ export default function Patterns() {
                 </div>
               </div>
             </div>
-            <button className="p-setup-save" onClick={() => setShowSetup(false)}>Save & Close ✓</button>
+            <button className="p-setup-save" onClick={() => setShowSetup(false)}>Save & Close</button>
           </div>
         )}
 
         <div className="p-stats">
           {[
-            { icon: '📅', label: 'Days Logged',  value: totalLogged },
-            { icon: '📅', label: 'Next Period',   value: nextPeriod },
-            { icon: '🔄', label: 'Cycle Length',  value: `${cycleLength}d` },
-            { icon: '🌸', label: 'Period Length', value: `${periodLength}d` },
+            { label: 'Days Logged',  value: totalLogged },
+            { label: 'Next Period',   value: nextPeriod },
+            { label: 'Cycle Length',  value: `${cycleLength}d` },
+            { label: 'Period Length', value: `${periodLength}d` },
           ].map(s => (
             <div key={s.label} className="p-stat-card">
-              <span className="p-stat-icon">{s.icon}</span>
               <span className="p-stat-value">{s.value}</span>
               <span className="p-stat-label">{s.label}</span>
             </div>
@@ -253,7 +252,7 @@ export default function Patterns() {
         </div>
 
         <div className="p-wave-card">
-          <h2 className="p-wave-title">📊 Pain Intensity Wave</h2>
+          <h2 className="p-wave-title">Pain Intensity Wave</h2>
           <p className="p-wave-sub">Log entries to see your pattern pulse build over time</p>
           <div className="p-wave">
             {[2,4,7,5,8,3,6,9,4,7,5,8,3,6,2,5,8,6,9,4,7,3,5,8,4,6,9,5,7,3].map((h,i) => (
@@ -264,15 +263,14 @@ export default function Patterns() {
         </div>
 
         <div>
-          <h2 className="p-insights-title">🔍 Cycle Insights</h2>
+          <h2 className="p-insights-title">Cycle Insights</h2>
           <div className="p-insights-grid">
             {[
-              { icon: '🐰', title: 'Bunny Trail Active', desc: periodStart ? `Your period started ${new Date(periodStart).toLocaleDateString('en-US',{month:'short',day:'numeric'})}. Estimated end in ${periodLength} days.` : 'Set your period start date to activate the bunny trail.', color: '#fff0f3', border: '#fce4ec' },
-              { icon: '📅', title: 'Next Cycle',         desc: periodStart ? `Your next period is estimated around ${nextPeriod}. Your cycle is ${cycleLength} days.` : 'Add your cycle data to see predictions.', color: '#fdf4ff', border: '#f5d0fe' },
-              { icon: '🌸', title: 'Ovulation Window',   desc: periodStart ? `Your ovulation window is approximately 14 days before your next period.` : 'Set your period start to calculate ovulation.', color: '#fefce8', border: '#fef08a' },
+              { title: 'Period Tracker', desc: periodStart ? `Your period started ${new Date(periodStart).toLocaleDateString('en-US',{month:'short',day:'numeric'})}. Estimated end in ${periodLength} days.` : 'Set your period start date to activate the bunny trail.', color: '#fff0f3', border: '#fce4ec' },
+              { title: 'Next Cycle',     desc: periodStart ? `Your next period is estimated around ${nextPeriod}. Your cycle is ${cycleLength} days.` : 'Add your cycle data to see predictions.', color: '#fdf4ff', border: '#f5d0fe' },
+              { title: 'Ovulation Window', desc: periodStart ? `Your ovulation window is approximately 14 days before your next period.` : 'Set your period start to calculate ovulation.', color: '#fefce8', border: '#fef08a' },
             ].map(c => (
               <div key={c.title} className="p-insight-card" style={{background:c.color, border:`1px solid ${c.border}`}}>
-                <span className="p-insight-icon">{c.icon}</span>
                 <div className="p-insight-title">{c.title}</div>
                 <div className="p-insight-desc">{c.desc}</div>
               </div>
