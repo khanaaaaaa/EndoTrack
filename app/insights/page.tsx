@@ -1,225 +1,257 @@
 'use client';
-import './insights.css';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
-const SAMPLE_INSIGHTS = [
-  {
-    id: 1,
-    type: 'dismissed',
-    severity: 'high',
-    title: 'Repeatedly Dismissed Symptoms',
-    summary: 'You\'ve logged "doctor said it\'s normal" 4 times in the past 3 months.',
-    detail: 'Symptoms that are repeatedly dismissed but persist may indicate an underlying condition. Endometriosis takes an average of 7–10 years to diagnose, often because symptoms are normalized by medical professionals.',
-    action: 'Request a referral to a gynecologist or endometriosis specialist.',
-    date: 'Last 3 months',
-    count: 4,
-  },
-  {
-    id: 2,
-    type: 'escalating',
-    severity: 'high',
-    title: 'Escalating Pain Intensity',
-    summary: 'Your average pain score has increased from 4.2 to 7.8 over 6 weeks.',
-    detail: 'A consistent upward trend in pain intensity is a significant pattern. Pain that worsens over time, especially around your cycle, is not something to ignore.',
-    action: 'Track your pain daily and bring this chart to your next appointment.',
-    date: 'Last 6 weeks',
-    count: 6,
-  },
-  {
-    id: 3,
-    type: 'cycle',
-    severity: 'medium',
-    title: '28-Day Recurring Pain Cycle',
-    summary: 'Sharp pain has occurred on a ~28-day cycle for the past 3 months.',
-    detail: 'Cyclical pain that aligns with your menstrual cycle is a hallmark symptom of endometriosis and adenomyosis. This pattern is medically significant.',
-    action: 'Note the exact days pain peaks and share with your doctor.',
-    date: 'Last 3 months',
-    count: 3,
-  },
-  {
-    id: 4,
-    type: 'recurring',
-    severity: 'medium',
-    title: 'Recurring Trigger: Period',
-    summary: 'Pain linked to your period has been logged 8 times in 2 months.',
-    detail: 'While some discomfort during menstruation is common, severe or debilitating pain is not normal and should be evaluated.',
-    action: 'Keep a detailed log of pain timing relative to your cycle start.',
-    date: 'Last 2 months',
-    count: 8,
-  },
-  {
-    id: 5,
-    type: 'emotional',
-    severity: 'low',
-    title: 'Emotional Distress Pattern',
-    summary: 'Frustrated or anxious mood logged on 6 of your last 10 entries.',
-    detail: 'Chronic pain has a significant impact on mental health. Emotional distress is a valid and important part of your health picture.',
-    action: 'Consider speaking with a counselor who specializes in chronic illness.',
-    date: 'Last 10 entries',
-    count: 6,
-  },
+const AFFIRMATIONS = [
+  "Your pain is real. Your experience is valid.",
+  "You deserve answers, not dismissal.",
+  "Tracking today is advocating for yourself tomorrow.",
+  "You know your body better than anyone.",
+  "One entry at a time. You're doing great.",
 ];
 
-const TYPE_CONFIG: Record<string, { color: string; bg: string; border: string; icon: string; label: string }> = {
-  dismissed: { color: '#be123c', bg: '#fff1f2', border: '#fecdd3', icon: '🚨', label: 'Dismissed' },
-  escalating: { color: '#c2410c', bg: '#fff7ed', border: '#fed7aa', icon: '📈', label: 'Escalating' },
-  cycle:      { color: '#7c3aed', bg: '#f5f3ff', border: '#ddd6fe', icon: '🔄', label: 'Cycle' },
-  recurring:  { color: '#b45309', bg: '#fffbeb', border: '#fde68a', icon: '⚠️', label: 'Recurring' },
-  emotional:  { color: '#0369a1', bg: '#f0f9ff', border: '#bae6fd', icon: '💙', label: 'Emotional' },
-};
+export default function Home() {
+  const [loading, setLoading] = useState(true);
+  const [fadeOut, setFadeOut] = useState(false);
+  const [affirmation, setAffirmation] = useState(0);
+  const [checkedIn, setCheckedIn] = useState(false);
+  const [quickPain, setQuickPain] = useState(5);
+  const [quickMood, setQuickMood] = useState<number | null>(null);
 
-const SEVERITY_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
-  high:   { label: 'High Priority',   color: '#be123c', bg: '#fff1f2' },
-  medium: { label: 'Medium Priority', color: '#b45309', bg: '#fffbeb' },
-  low:    { label: 'Low Priority',    color: '#0369a1', bg: '#f0f9ff' },
-};
+  useEffect(() => {
+    const fade = setTimeout(() => setFadeOut(true), 3200);
+    const done = setTimeout(() => setLoading(false), 3800);
+    return () => { clearTimeout(fade); clearTimeout(done); };
+  }, []);
 
-export default function Insights() {
-  const [expanded, setExpanded] = useState<number | null>(null);
-  const [filter, setFilter] = useState<string>('all');
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setAffirmation(a => (a + 1) % AFFIRMATIONS.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
 
-  const filtered = filter === 'all' ? SAMPLE_INSIGHTS : SAMPLE_INSIGHTS.filter(i => i.severity === filter);
-  const highCount = SAMPLE_INSIGHTS.filter(i => i.severity === 'high').length;
+  if (loading) return <Splash fadeOut={fadeOut} />;
+
+  const today = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+  const hour  = new Date().getHours();
+  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
 
   return (
     <div className="page">
       <nav className="nav">
         <div className="nav-inner">
-          <a href="/" className="nav-logo">🌸 EndoTrack</a>
+          <span className="nav-logo">🌸 EndoTrack</span>
           {['Home','Journal','Patterns','Insights','Report'].map(l => (
             <a key={l} href={`/${l==='Home'?'':l.toLowerCase()}`}
-              className={`nav-link ${l==='Insights'?'nav-link-active':''}`}>{l}</a>
+              className={`nav-link ${l==='Home'?'nav-link-active':''}`}>{l}</a>
           ))}
           <a href="/journal" className="btn-primary">+ Log Symptom</a>
         </div>
       </nav>
 
-      <div className="i-container">
+      <div className="container">
 
-        {/* Header */}
-        <div className="i-header">
+        {/* Greeting */}
+        <div className="h-greeting-row">
           <div>
-            <h1 className="i-title">Second Look Insights</h1>
-            <p className="i-sub">Patterns your symptoms are telling you — that shouldn&apos;t be ignored.</p>
+            <p className="h-date">{today}</p>
+            <h1 className="h-greeting">{greeting} 🌸</h1>
+          </div>
+          <div className="h-streak-badge">
+            <span className="h-streak-fire">🔥</span>
+            <div>
+              <div className="h-streak-num">3</div>
+              <div className="h-streak-label">day streak</div>
+            </div>
           </div>
         </div>
 
-        {/* Normal Alert */}
-        {highCount > 0 && (
-          <div className="i-alert i-animate">
-            <div className="i-alert-left">
-              <div className="i-alert-pulse">
-                <div className="i-alert-dot" />
-              </div>
+        {/* Rotating Affirmation */}
+        <div className="h-affirmation">
+          <div className="h-affirmation-bar" />
+          <p className="h-affirmation-text" key={affirmation}>
+            {AFFIRMATIONS[affirmation]}
+          </p>
+        </div>
+
+        {/* Quick Check-in */}
+        {!checkedIn ? (
+          <div className="card h-checkin">
+            <div className="h-checkin-top">
               <div>
-                <div className="i-alert-title">⚠️ This may NOT be typical.</div>
-                <div className="i-alert-desc">
-                  {highCount} high-priority pattern{highCount > 1 ? 's' : ''} detected. These symptoms have been flagged as potentially significant and warrant medical evaluation.
-                </div>
+                <h2 className="h-checkin-title">Quick Check-in</h2>
+                <p className="h-checkin-sub">30 seconds. How are you right now?</p>
               </div>
+              <span style={{ fontSize: '1.75rem' }}>🌡️</span>
             </div>
-            <a href="/report" className="btn-primary i-alert-btn">Generate Report →</a>
+
+            <div className="h-pain-row">
+              <span className="h-pain-label">Pain</span>
+              <input type="range" min={0} max={10} value={quickPain}
+                onChange={e => setQuickPain(Number(e.target.value))}
+                className="j-slider" />
+              <span className="h-pain-val"
+                style={{ color: quickPain <= 3 ? '#4ade80' : quickPain <= 6 ? '#fb923c' : '#f43f5e' }}>
+                {quickPain}
+              </span>
+            </div>
+
+            <div className="h-mood-row">
+              {['😔','😐','😤','😰','🙂','😊'].map((m, i) => (
+                <button key={m} onClick={() => setQuickMood(i)}
+                  className={`h-mood-btn ${quickMood === i ? 'h-mood-active' : ''}`}>{m}</button>
+              ))}
+            </div>
+
+            <div className="h-checkin-actions">
+              <button className="btn-primary h-checkin-save"
+                onClick={() => setCheckedIn(true)}>
+                Save Quick Entry ✓
+              </button>
+              <a href="/journal" className="h-checkin-full">Full entry →</a>
+            </div>
+          </div>
+        ) : (
+          <div className="card h-checked-done">
+            <span style={{ fontSize: '2rem' }}>✅</span>
+            <div>
+              <div className="h-done-title">Check-in saved!</div>
+              <div className="h-done-sub">Pain: {quickPain}/10 · <a href="/journal" style={{ color: '#e91e8c' }}>Add more detail →</a></div>
+            </div>
           </div>
         )}
 
-        {/* Summary Stats */}
-        <div className="i-stats">
+        {/* Normal Alert */}
+        <div className="h-alert">
+          <div className="h-alert-pulse"><div className="h-alert-dot" /></div>
+          <div className="h-alert-body">
+            <div className="h-alert-title">⚠️ This may not be typical.</div>
+            <div className="h-alert-desc">Recurring high-pain entries detected. Your patterns may warrant medical evaluation.</div>
+          </div>
+          <a href="/insights" className="btn-primary h-alert-btn">See Why →</a>
+        </div>
+
+        {/* Stats */}
+        <div className="grid-3">
           {[
-            { label: 'Total Patterns',  value: SAMPLE_INSIGHTS.length, color: '#e91e8c', bg: '#fff0f3' },
-            { label: 'High Priority',   value: SAMPLE_INSIGHTS.filter(i=>i.severity==='high').length,   color: '#be123c', bg: '#fff1f2' },
-            { label: 'Medium Priority', value: SAMPLE_INSIGHTS.filter(i=>i.severity==='medium').length, color: '#b45309', bg: '#fffbeb' },
-            { label: 'Low Priority',    value: SAMPLE_INSIGHTS.filter(i=>i.severity==='low').length,    color: '#0369a1', bg: '#f0f9ff' },
+            { label: 'Entries Logged', value: '6',   icon: '📝', color: '#e91e8c', bg: '#fce4ec' },
+            { label: 'Avg Pain Score', value: '6.8', icon: '📊', color: '#c2410c', bg: '#fff7ed' },
+            { label: 'Days Tracked',   value: '14',  icon: '📅', color: '#7c3aed', bg: '#f5f3ff' },
           ].map(s => (
-            <div key={s.label} className="i-stat-card" style={{ background: s.bg }}>
-              <div className="i-stat-value" style={{ color: s.color }}>{s.value}</div>
-              <div className="i-stat-label">{s.label}</div>
+            <div key={s.label} className="card stat-card">
+              <div className="stat-icon" style={{ background: s.bg }}>{s.icon}</div>
+              <div className="stat-value" style={{ color: s.color }}>{s.value}</div>
+              <div className="stat-label">{s.label}</div>
             </div>
           ))}
         </div>
 
-        {/* Filter Tabs */}
-        <div className="i-filters">
-          {['all','high','medium','low'].map(f => (
-            <button key={f} onClick={() => setFilter(f)}
-              className={`i-filter-btn ${filter === f ? 'i-filter-active' : ''}`}>
-              {f === 'all' ? 'All Insights' : SEVERITY_CONFIG[f].label}
-            </button>
+        {/* This Week Heatmap */}
+        <div className="card h-week">
+          <h2 className="h-week-title">This Week</h2>
+          <div className="h-week-grid">
+            {['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map((d, i) => {
+              const pain = [7, 4, 0, 8, 5, 3, 0][i];
+              const bg = pain === 0 ? '#fce4ec' : pain <= 3 ? '#bbf7d0' : pain <= 6 ? '#fed7aa' : '#fecaca';
+              const color = pain === 0 ? '#b07a90' : pain <= 3 ? '#166534' : pain <= 6 ? '#9a3412' : '#991b1b';
+              return (
+                <div key={d} className="h-week-day">
+                  <div className="h-week-bubble" style={{ background: bg, color }}>
+                    {pain === 0 ? '—' : pain}
+                  </div>
+                  <span className="h-week-label">{d}</span>
+                </div>
+              );
+            })}
+          </div>
+          <div className="h-week-legend">
+            <span style={{ color: '#b07a90' }}>— No entry</span>
+            <span style={{ color: '#166534' }}>● Mild</span>
+            <span style={{ color: '#9a3412' }}>● Moderate</span>
+            <span style={{ color: '#991b1b' }}>● Severe</span>
+          </div>
+        </div>
+
+        {/* Nav Cards */}
+        <div className="grid-2">
+          {[
+            { href: '/patterns', icon: '📊', title: 'Pattern Pulse',   desc: 'Bunny calendar + pain wave visualization' },
+            { href: '/insights', icon: '🔍', title: 'Second Look',      desc: 'AI flags symptoms that keep getting dismissed' },
+            { href: '/journal',  icon: '✍️', title: 'Full Journal',     desc: 'Log pain, mood, symptoms and triggers' },
+            { href: '/report',   icon: '📄', title: 'Doctor Report',    desc: 'Export a PDF timeline for your appointment' },
+          ].map(c => (
+            <a key={c.href} href={c.href} className="feature-link">
+              <div className="card feature-card">
+                <div className="feature-icon icon-purple">{c.icon}</div>
+                <div className="feature-title">{c.title}</div>
+                <div className="feature-desc">{c.desc}</div>
+              </div>
+            </a>
           ))}
         </div>
 
-        {/* Insight Cards */}
-        <div className="i-cards">
-          {filtered.map((insight, idx) => {
-            const cfg  = TYPE_CONFIG[insight.type];
-            const scfg = SEVERITY_CONFIG[insight.severity];
-            const isOpen = expanded === insight.id;
-
-            return (
-              <div key={insight.id} className="i-card i-animate"
-                style={{ animationDelay: `${idx * 0.07}s`, borderColor: cfg.border }}>
-
-                {/* Card Header */}
-                <div className="i-card-top" onClick={() => setExpanded(isOpen ? null : insight.id)}>
-                  <div className="i-card-left">
-                    <div className="i-card-icon" style={{ background: cfg.bg, color: cfg.color }}>
-                      {cfg.icon}
-                    </div>
-                    <div>
-                      <div className="i-card-badges">
-                        <span className="i-badge" style={{ background: cfg.bg, color: cfg.color }}>{cfg.label}</span>
-                        <span className="i-badge" style={{ background: scfg.bg, color: scfg.color }}>{scfg.label}</span>
-                      </div>
-                      <h3 className="i-card-title">{insight.title}</h3>
-                      <p className="i-card-summary">{insight.summary}</p>
-                    </div>
-                  </div>
-                  <div className="i-card-right">
-                    <div className="i-card-count" style={{ color: cfg.color, background: cfg.bg }}>
-                      ×{insight.count}
-                    </div>
-                    <div className={`i-chevron ${isOpen ? 'i-chevron-open' : ''}`}>›</div>
-                  </div>
-                </div>
-
-                {/* Expanded Detail */}
-                {isOpen && (
-                  <div className="i-card-detail i-animate">
-                    <div className="i-detail-divider" style={{ background: cfg.border }} />
-
-                    <div className="i-detail-section">
-                      <div className="i-detail-label">What this means</div>
-                      <p className="i-detail-text">{insight.detail}</p>
-                    </div>
-
-                    <div className="i-detail-action" style={{ background: cfg.bg, border: `1px solid ${cfg.border}` }}>
-                      <span className="i-detail-action-icon">💡</span>
-                      <div>
-                        <div className="i-detail-action-label">Recommended Action</div>
-                        <div className="i-detail-action-text">{insight.action}</div>
-                      </div>
-                    </div>
-
-                    <div className="i-detail-meta">
-                      <span>📅 {insight.date}</span>
-                      <span>🔢 Occurred {insight.count} times</span>
-                    </div>
-                  </div>
-                )}
-              </div>
-            );
-          })}
+        {/* Footer Quote */}
+        <div className="quote-card">
+          <div className="quote-heart">💗</div>
+          <p className="quote-text">"This doesn&apos;t have to be something you just live with."</p>
+          <p className="quote-sub">On average, endometriosis takes 7–10 years to diagnose. Your records can help change that.</p>
         </div>
 
-        {/* Validation Card */}
-        <div className="i-validation">
-          <div className="i-validation-icon">💗</div>
-          <h2 className="i-validation-title">You know your body best.</h2>
-          <p className="i-validation-text">
-            These insights are here to help you advocate for yourself. If something feels wrong, it deserves to be taken seriously — by you and by your doctor.
-          </p>
-          <a href="/report" className="btn-primary">📄 Generate Doctor Report</a>
-        </div>
+      </div>
+    </div>
+  );
+}
 
+function Splash({ fadeOut }: { fadeOut: boolean }) {
+  const [progress, setProgress] = useState(0);
+  const [step, setStep] = useState(0);
+  const steps = ['Initializing your journal...','Loading symptom patterns...','Preparing your insights...','Almost ready...'];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setProgress(p => { if (p >= 100) { clearInterval(interval); return 100; } return p + 1; });
+    }, 28);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    if (progress < 30) setStep(0);
+    else if (progress < 60) setStep(1);
+    else if (progress < 85) setStep(2);
+    else setStep(3);
+  }, [progress]);
+
+  return (
+    <div className={`splash ${fadeOut ? 'splash-fade' : ''}`}>
+      <div className="blob blob-1" /><div className="blob blob-2" /><div className="blob blob-3" />
+      {[...Array(12)].map((_,i) => <div key={i} className={`particle particle-${i+1}`} />)}
+      <div className="splash-content">
+        <div className="splash-logo-wrap">
+          <div className="splash-ring splash-ring-1" />
+          <div className="splash-ring splash-ring-2" />
+          <div className="splash-ring splash-ring-3" />
+          <div className="splash-icon">🌸</div>
+        </div>
+        <h1 className="splash-title">EndoTrack</h1>
+        <p className="splash-tagline">Your body. Your data. Your voice.</p>
+        <div className="pulse-wave">
+          {[20,40,65,30,80,45,90,35,70,25,60,40,85,30,55].map((h,i) => (
+            <div key={i} className="pulse-bar" style={{ height:`${h}%`, animationDelay:`${i*0.08}s` }} />
+          ))}
+        </div>
+        <div className="splash-progress-wrap">
+          <div className="splash-progress-track">
+            <div className="splash-progress-fill" style={{ width:`${progress}%` }} />
+            <div className="splash-progress-glow" style={{ left:`${progress}%` }} />
+          </div>
+          <div className="splash-progress-row">
+            <span className="splash-step">{steps[step]}</span>
+            <span className="splash-pct">{progress}%</span>
+          </div>
+        </div>
+        <div className="splash-dots">
+          {[0,1,2].map(i => <div key={i} className="splash-dot" style={{ animationDelay:`${i*0.2}s` }} />)}
+        </div>
       </div>
     </div>
   );
