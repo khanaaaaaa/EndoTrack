@@ -183,15 +183,6 @@ function Splash({ fadeOut }: { fadeOut: boolean }) {
         <h1 className="splash-title">EndoTrack</h1>
         <p className="splash-tagline">Your body. Your data. Your voice.</p>
 
-        <div className="pulse-wave">
-          {[20, 40, 65, 30, 80, 45, 90, 35, 70, 25, 60, 40, 85, 30, 55].map((h, i) => (
-            <div key={i} className="pulse-bar" style={{
-              height: `${h}%`,
-              animationDelay: `${i * 0.08}s`,
-            }} />
-          ))}
-        </div>
-
         <div className="splash-progress-wrap">
           <div className="splash-progress-track">
             <div className="splash-progress-fill" style={{ width: `${progress}%` }} />
