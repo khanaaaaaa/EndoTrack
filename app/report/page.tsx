@@ -14,44 +14,10 @@ const SAMPLE_ENTRIES = [
 const PAIN_COLOR = (p: number) => p <= 3 ? '#4ade80' : p <= 6 ? '#fb923c' : '#f43f5e';
 
 export default function Report() {
-  const [name, setName]     = useState('');
-  const [dob, setDob]       = useState('');
-  const [doctor, setDoctor] = useState('');
-  const [notes, setNotes]   = useState('');
-  const [copied, setCopied] = useState(false);
-
   const avgPain     = Math.round(SAMPLE_ENTRIES.reduce((a, e) => a + e.pain, 0) / SAMPLE_ENTRIES.length * 10) / 10;
   const highPain    = SAMPLE_ENTRIES.filter(e => e.pain >= 7).length;
   const allSymptoms = [...new Set(SAMPLE_ENTRIES.flatMap(e => e.symptoms))];
   const allTriggers = [...new Set(SAMPLE_ENTRIES.flatMap(e => e.triggers))];
-
-  const handleCopy = () => {
-    const text = [
-      'ENDOTRACK SYMPTOM REPORT',
-      '',
-      `Patient: ${name || 'Not provided'}`,
-      `Date of Birth: ${dob || 'Not provided'}`,
-      `Prepared for: ${doctor ? 'Dr. ' + doctor : 'Not provided'}`,
-      `Report Date: ${new Date().toLocaleDateString()}`,
-      '',
-      'SUMMARY',
-      `Total Entries: ${SAMPLE_ENTRIES.length}`,
-      `Average Pain Score: ${avgPain}/10`,
-      `High Pain Episodes (7+): ${highPain}`,
-      `Symptoms Logged: ${allSymptoms.join(', ')}`,
-      `Triggers Identified: ${allTriggers.join(', ')}`,
-      '',
-      'SYMPTOM LOG',
-      ...SAMPLE_ENTRIES.map(e =>
-        `${e.date} | Pain: ${e.pain}/10 | Mood: ${e.mood} | Symptoms: ${e.symptoms.join(', ')} | Triggers: ${e.triggers.join(', ')}\n"${e.note}"`
-      ),
-      '',
-      `ADDITIONAL NOTES\n${notes || 'None'}`,
-    ].join('\n');
-    navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2500);
-  };
 
   return (
     <div className="page">
@@ -72,32 +38,6 @@ export default function Report() {
         <div className="r-header">
           <h1 className="r-title">Doctor Report</h1>
           <p className="r-sub">A summary of your logged symptoms to bring to your appointment.</p>
-        </div>
-
-        {/* Patient Info */}
-        <div className="r-card r-animate">
-          <h2 className="r-card-title">Your Information</h2>
-          <p className="r-card-sub">Optional — included in the copied report</p>
-          <div className="r-form-grid">
-            <div className="r-field">
-              <label className="r-label">Your Name</label>
-              <input className="r-input" placeholder="Jane Doe" value={name} onChange={e => setName(e.target.value)} />
-            </div>
-            <div className="r-field">
-              <label className="r-label">Date of Birth</label>
-              <input className="r-input" type="date" value={dob} onChange={e => setDob(e.target.value)} />
-            </div>
-            <div className="r-field">
-              <label className="r-label">Doctor&apos;s Name</label>
-              <input className="r-input" placeholder="Dr. Smith" value={doctor} onChange={e => setDoctor(e.target.value)} />
-            </div>
-          </div>
-          <div className="r-field" style={{ marginTop: '1rem' }}>
-            <label className="r-label">Additional Notes</label>
-            <textarea className="r-textarea" rows={3}
-              placeholder="Anything else you want your doctor to know..."
-              value={notes} onChange={e => setNotes(e.target.value)} />
-          </div>
         </div>
 
         {/* Stats */}
@@ -187,17 +127,6 @@ export default function Report() {
               </div>
             ))}
           </div>
-        </div>
-
-        {/* Copy */}
-        <div className="r-export r-animate">
-          <div>
-            <div className="r-export-title">Ready to share?</div>
-            <div className="r-export-sub">Copy the full report as plain text to paste into an email or document for your doctor.</div>
-          </div>
-          <button className="btn-primary" onClick={handleCopy} style={{ whiteSpace: 'nowrap' }}>
-            {copied ? 'Copied to clipboard' : 'Copy Full Report'}
-          </button>
         </div>
 
         {/* Disclaimer */}

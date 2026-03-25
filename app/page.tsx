@@ -40,7 +40,7 @@ export default function Home() {
   if (loading) return <Splash fadeOut={fadeOut} />;
 
   const today = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-  const hour  = new Date().getHours();
+  const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
   const painColor = quickPain <= 3 ? '#4ade80' : quickPain <= 6 ? '#fb923c' : '#f43f5e';
 
@@ -64,21 +64,20 @@ export default function Home() {
           <div>
             <p className="h-date">{today}</p>
             <h1 className="h-greeting">{greeting}</h1>
+            <p style={{ color: '#888', fontSize: '0.9rem', marginTop: '0.3rem' }}>
+              Your personalized endometriosis care tracker.
+            </p>
           </div>
           <div className="h-streak-badge">
-            <div>
-              <div className="h-streak-num">3</div>
-              <div className="h-streak-label">day streak</div>
-            </div>
+            <div className="h-streak-num">3</div>
+            <div className="h-streak-label">day streak</div>
           </div>
         </div>
 
         {/* Affirmation */}
         <div className="h-affirmation">
           <div className="h-affirmation-bar" />
-          <p className="h-affirmation-text" key={affirmation}>
-            {AFFIRMATIONS[affirmation]}
-          </p>
+          <p className="h-affirmation-text" key={affirmation}>{AFFIRMATIONS[affirmation]}</p>
         </div>
 
         {/* Quick Check-in */}
@@ -86,8 +85,8 @@ export default function Home() {
           <div className="card h-checkin">
             <div className="h-checkin-top">
               <div>
-                <h2 className="h-checkin-title">Quick Check-in</h2>
-                <p className="h-checkin-sub">30 seconds. How are you right now?</p>
+                <h2 className="h-checkin-title">Today&apos;s Check-in</h2>
+                <p className="h-checkin-sub">Log how you feel right now. It only takes 30 seconds.</p>
               </div>
             </div>
 
@@ -108,39 +107,43 @@ export default function Home() {
 
             <div className="h-checkin-actions">
               <button className="btn-primary h-checkin-save" onClick={() => setCheckedIn(true)}>
-                Save Quick Entry
+                Save Entry
               </button>
-              <a href="/journal" className="h-checkin-full">Full entry</a>
+              <a href="/journal" className="h-checkin-full">Add full details</a>
             </div>
           </div>
         ) : (
           <div className="card h-checked-done">
             <div>
-              <div className="h-done-title">Check-in saved</div>
-              <div className="h-done-sub">Pain: {quickPain}/10 — <a href="/journal" style={{ color: '#e91e8c' }}>Add more detail</a></div>
+              <div className="h-done-title">Entry saved</div>
+              <div className="h-done-sub">
+                Pain: {quickPain}/10 —{' '}
+                <a href="/journal" style={{ color: '#c0396b' }}>Add symptoms and triggers</a>
+              </div>
             </div>
           </div>
         )}
 
-        {/* Alert */}
+        {/* Pattern Alert */}
         <div className="h-alert">
           <div className="h-alert-pulse"><div className="h-alert-dot" /></div>
           <div className="h-alert-body">
-            <div className="h-alert-title">This may not be typical.</div>
-            <div className="h-alert-desc">Recurring high-pain entries detected. Your patterns may warrant medical evaluation.</div>
+            <div className="h-alert-title">A pattern has been detected.</div>
+            <div className="h-alert-desc">
+              High-pain entries are recurring. This may be worth discussing with a specialist.
+            </div>
           </div>
-          <a href="/insights" className="btn-primary h-alert-btn">See Why</a>
+          <a href="/insights" className="btn-primary h-alert-btn">View Insights</a>
         </div>
 
         {/* Stats */}
         <div className="grid-3">
           {[
-            { label: 'Entries Logged', value: '6',   color: '#e91e8c', bg: '#fce4ec' },
-            { label: 'Avg Pain Score', value: '6.8', color: '#c2410c', bg: '#fff7ed' },
-            { label: 'Days Tracked',   value: '14',  color: '#7c3aed', bg: '#f5f3ff' },
+            { label: 'Entries Logged', value: '6',   color: '#c0396b', bg: '#fff5f8' },
+            { label: 'Avg Pain Score', value: '6.8', color: '#b45309', bg: '#fffbeb' },
+            { label: 'Days Tracked',   value: '14',  color: '#1d4ed8', bg: '#eff6ff' },
           ].map(s => (
             <div key={s.label} className="card stat-card">
-              <div className="stat-icon" style={{ background: s.bg }} />
               <div className="stat-value" style={{ color: s.color }}>{s.value}</div>
               <div className="stat-label">{s.label}</div>
             </div>
@@ -149,12 +152,12 @@ export default function Home() {
 
         {/* This Week */}
         <div className="card h-week">
-          <h2 className="h-week-title">This Week</h2>
+          <h2 className="h-week-title">This Week at a Glance</h2>
           <div className="h-week-grid">
             {['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map((d, i) => {
               const pain = [7,4,0,8,5,3,0][i];
-              const bg    = pain === 0 ? '#fce4ec' : pain <= 3 ? '#bbf7d0' : pain <= 6 ? '#fed7aa' : '#fecaca';
-              const color = pain === 0 ? '#b07a90' : pain <= 3 ? '#166534' : pain <= 6 ? '#9a3412' : '#991b1b';
+              const bg    = pain === 0 ? '#f5f5f5' : pain <= 3 ? '#dcfce7' : pain <= 6 ? '#fef9c3' : '#fee2e2';
+              const color = pain === 0 ? '#aaa'    : pain <= 3 ? '#166534' : pain <= 6 ? '#854d0e' : '#991b1b';
               return (
                 <div key={d} className="h-week-day">
                   <div className="h-week-bubble" style={{ background: bg, color }}>
@@ -166,34 +169,44 @@ export default function Home() {
             })}
           </div>
           <div className="h-week-legend">
-            <span style={{ color: '#b07a90' }}>— No entry</span>
+            <span style={{ color: '#aaa' }}>— No entry</span>
             <span style={{ color: '#166534' }}>Mild</span>
-            <span style={{ color: '#9a3412' }}>Moderate</span>
+            <span style={{ color: '#854d0e' }}>Moderate</span>
             <span style={{ color: '#991b1b' }}>Severe</span>
           </div>
         </div>
 
-        {/* Feature Cards */}
-        <div className="grid-2">
-          {[
-            { href: '/patterns', title: 'Pattern Pulse',  desc: 'Bunny calendar and pain wave visualization' },
-            { href: '/insights', title: 'Second Look',    desc: 'Flags symptoms that keep getting dismissed' },
-            { href: '/journal',  title: 'Full Journal',   desc: 'Log pain, mood, symptoms and triggers' },
-            { href: '/report',   title: 'Doctor Report',  desc: 'Export a PDF timeline for your appointment' },
-          ].map(c => (
-            <a key={c.href} href={c.href} className="feature-link">
-              <div className="card feature-card">
-                <div className="feature-title">{c.title}</div>
-                <div className="feature-desc">{c.desc}</div>
-              </div>
-            </a>
-          ))}
+        {/* Tools */}
+        <div>
+          <h2 style={{ fontWeight: 700, fontSize: '1rem', color: '#1a1a1a', marginBottom: '1rem' }}>
+            Your Care Tools
+          </h2>
+          <div className="grid-2">
+            {[
+              { href: '/journal',  title: 'Symptom Journal',  desc: 'Log pain, mood, symptoms and triggers step by step' },
+              { href: '/patterns', title: 'Cycle Patterns',   desc: 'Track your period and visualize pain across your cycle' },
+              { href: '/insights', title: 'Health Insights',  desc: 'See which symptoms are recurring and may need attention' },
+              { href: '/report',   title: 'Doctor Report',    desc: 'A clear symptom timeline to bring to your appointment' },
+            ].map(c => (
+              <a key={c.href} href={c.href} className="feature-link">
+                <div className="card feature-card">
+                  <div className="feature-title">{c.title}</div>
+                  <div className="feature-desc">{c.desc}</div>
+                </div>
+              </a>
+            ))}
+          </div>
         </div>
 
-        {/* Quote */}
+        {/* About */}
         <div className="quote-card">
-          <p className="quote-text">&quot;This doesn&apos;t have to be something you just live with.&quot;</p>
-          <p className="quote-sub">On average, endometriosis takes 7–10 years to diagnose. Your records can help change that.</p>
+          <p className="quote-text">
+            &quot;EndoTrack helps you turn daily experiences into meaningful health insights.&quot;
+          </p>
+          <p className="quote-sub">
+            On average, endometriosis takes 7–10 years to diagnose. Consistent tracking gives you
+            the evidence to advocate for yourself at every appointment.
+          </p>
         </div>
 
       </div>
@@ -218,7 +231,9 @@ function Splash({ fadeOut }: { fadeOut: boolean }) {
     <div className={`splash ${fadeOut ? 'splash-fade' : ''}`}>
       <div className="splash-content">
         <h1 className="splash-title">EndoTrack</h1>
-        <p className="splash-tagline">&quot;This doesn&apos;t have to be something you just live with.&quot;</p>
+        <p className="splash-tagline">
+          A personalized care tool for people with endometriosis.
+        </p>
         <div className="splash-bar-track">
           <div className="splash-bar-fill" style={{ width: `${progress}%` }} />
         </div>
