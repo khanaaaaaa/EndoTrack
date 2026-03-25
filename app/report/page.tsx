@@ -4,7 +4,7 @@ import { useState } from 'react';
 
 const SAMPLE_ENTRIES = [
   { date: 'Mar 15, 2025', pain: 8, mood: 'Frustrated', symptoms: ['Cramping', 'Bloating', 'Back Pain'], triggers: ['Period'], note: 'Sharp pain during my period again. Doctor said it\'s normal but it\'s getting worse every month.' },
-  { date: 'Mar 12, 2025', pain: 5, mood: 'Anxious',    symptoms: ['Fatigue', 'Headache'],               triggers: ['Stress'],  note: 'Exhausted all day. Hard to focus at work.' },
+  { date: 'Mar 12, 2025', pain: 5, mood: 'Anxious',    symptoms: ['Fatigue', 'Headache'],               triggers: ['Stress'], note: 'Exhausted all day. Hard to focus at work.' },
   { date: 'Mar 8, 2025',  pain: 9, mood: 'Very Low',   symptoms: ['Stabbing Pain', 'Nausea', 'Bloating'], triggers: ['Period', 'Sex'], note: 'Worst pain this month. Had to leave work early. This is not normal.' },
   { date: 'Feb 18, 2025', pain: 7, mood: 'Frustrated', symptoms: ['Cramping', 'Pressure'],              triggers: ['Period'], note: 'Period started again. Same pain as last month. Told it\'s just cramps.' },
   { date: 'Feb 10, 2025', pain: 4, mood: 'Neutral',    symptoms: ['Bloating', 'Fatigue'],               triggers: ['Food'],   note: 'Bloating after eating. Uncomfortable all evening.' },
@@ -14,25 +14,43 @@ const SAMPLE_ENTRIES = [
 const PAIN_COLOR = (p: number) => p <= 3 ? '#4ade80' : p <= 6 ? '#fb923c' : '#f43f5e';
 
 export default function Report() {
-  const [name, setName]       = useState('');
-  const [dob, setDob]         = useState('');
-  const [doctor, setDoctor]   = useState('');
-  const [notes, setNotes]     = useState('');
-  const [generated, setGenerated] = useState(false);
-  const [copied, setCopied]   = useState(false);
+  const [name, setName]     = useState('');
+  const [dob, setDob]       = useState('');
+  const [doctor, setDoctor] = useState('');
+  const [notes, setNotes]   = useState('');
+  const [copied, setCopied] = useState(false);
 
-  const avgPain   = Math.round(SAMPLE_ENTRIES.reduce((a, e) => a + e.pain, 0) / SAMPLE_ENTRIES.length * 10) / 10;
-  const highPain  = SAMPLE_ENTRIES.filter(e => e.pain >= 7).length;
+  const avgPain     = Math.round(SAMPLE_ENTRIES.reduce((a, e) => a + e.pain, 0) / SAMPLE_ENTRIES.length * 10) / 10;
+  const highPain    = SAMPLE_ENTRIES.filter(e => e.pain >= 7).length;
   const allSymptoms = [...new Set(SAMPLE_ENTRIES.flatMap(e => e.symptoms))];
   const allTriggers = [...new Set(SAMPLE_ENTRIES.flatMap(e => e.triggers))];
 
-  const handleGenerate = () => setGenerated(true);
-
   const handleCopy = () => {
-    const text = `ENDOTRACK SYMPTOM REPORT\n\nPatient: ${name || 'Not provided'}\nDate of Birth: ${dob || 'Not provided'}\nPrepared for: Dr. ${doctor || 'Not provided'}\nReport Date: ${new Date().toLocaleDateString()}\n\nSUMMARY\nTotal Entries: ${SAMPLE_ENTRIES.length}\nAverage Pain Score: ${avgPain}/10\nHigh Pain Episodes (7+): ${highPain}\nSymptoms Logged: ${allSymptoms.join(', ')}\nTriggers Identified: ${allTriggers.join(', ')}\n\nSYMPTOM TIMELINE\n${SAMPLE_ENTRIES.map(e => `${e.date} — Pain: ${e.pain}/10 | Mood: ${e.mood} | Symptoms: ${e.symptoms.join(', ')}\nNote: ${e.note}`).join('\n\n')}\n\nADDITIONAL NOTES\n${notes || 'None'}`;
+    const text = [
+      'ENDOTRACK SYMPTOM REPORT',
+      '',
+      `Patient: ${name || 'Not provided'}`,
+      `Date of Birth: ${dob || 'Not provided'}`,
+      `Prepared for: ${doctor ? 'Dr. ' + doctor : 'Not provided'}`,
+      `Report Date: ${new Date().toLocaleDateString()}`,
+      '',
+      'SUMMARY',
+      `Total Entries: ${SAMPLE_ENTRIES.length}`,
+      `Average Pain Score: ${avgPain}/10`,
+      `High Pain Episodes (7+): ${highPain}`,
+      `Symptoms Logged: ${allSymptoms.join(', ')}`,
+      `Triggers Identified: ${allTriggers.join(', ')}`,
+      '',
+      'SYMPTOM LOG',
+      ...SAMPLE_ENTRIES.map(e =>
+        `${e.date} | Pain: ${e.pain}/10 | Mood: ${e.mood} | Symptoms: ${e.symptoms.join(', ')} | Triggers: ${e.triggers.join(', ')}\n"${e.note}"`
+      ),
+      '',
+      `ADDITIONAL NOTES\n${notes || 'None'}`,
+    ].join('\n');
     navigator.clipboard.writeText(text);
     setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    setTimeout(() => setCopied(false), 2500);
   };
 
   return (
@@ -52,25 +70,18 @@ export default function Report() {
 
         {/* Header */}
         <div className="r-header">
-          <div>
-            <h1 className="r-title">Doctor Report</h1>
-            <p className="r-sub">Auto-generated symptom timeline ready to share with your doctor.</p>
-          </div>
+          <h1 className="r-title">Doctor Report</h1>
+          <p className="r-sub">A summary of your logged symptoms to bring to your appointment.</p>
         </div>
 
         {/* Patient Info */}
         <div className="r-card r-animate">
-          <div className="r-card-header">
-            <div className="r-card-icon" style={{ background: '#fff0f3' }}>P</div>
-            <div>
-              <h2 className="r-card-title">Patient Information</h2>
-              <p className="r-card-sub">Optional — helps personalize your report</p>
-            </div>
-          </div>
+          <h2 className="r-card-title">Your Information</h2>
+          <p className="r-card-sub">Optional — included in the copied report</p>
           <div className="r-form-grid">
             <div className="r-field">
               <label className="r-label">Your Name</label>
-              <input className="r-input" placeholder="e.g. Jane Doe" value={name} onChange={e => setName(e.target.value)} />
+              <input className="r-input" placeholder="Jane Doe" value={name} onChange={e => setName(e.target.value)} />
             </div>
             <div className="r-field">
               <label className="r-label">Date of Birth</label>
@@ -78,18 +89,18 @@ export default function Report() {
             </div>
             <div className="r-field">
               <label className="r-label">Doctor&apos;s Name</label>
-              <input className="r-input" placeholder="e.g. Dr. Smith" value={doctor} onChange={e => setDoctor(e.target.value)} />
+              <input className="r-input" placeholder="Dr. Smith" value={doctor} onChange={e => setDoctor(e.target.value)} />
             </div>
           </div>
-          <div className="r-field">
-            <label className="r-label">Additional Notes for Doctor</label>
+          <div className="r-field" style={{ marginTop: '1rem' }}>
+            <label className="r-label">Additional Notes</label>
             <textarea className="r-textarea" rows={3}
               placeholder="Anything else you want your doctor to know..."
               value={notes} onChange={e => setNotes(e.target.value)} />
           </div>
         </div>
 
-        {/* Summary Stats */}
+        {/* Stats */}
         <div className="r-stats">
           {[
             { label: 'Total Entries',      value: SAMPLE_ENTRIES.length, color: '#e91e8c', bg: '#fff0f3' },
@@ -104,15 +115,10 @@ export default function Report() {
           ))}
         </div>
 
-        {/* Pain Timeline Visual */}
+        {/* Pain Timeline */}
         <div className="r-card r-animate">
-          <div className="r-card-header">
-            <div className="r-card-icon" style={{ background: '#fff7ed' }}>T</div>
-            <div>
-              <h2 className="r-card-title">Pain Timeline</h2>
-              <p className="r-card-sub">Visual overview of pain intensity over time</p>
-            </div>
-          </div>
+          <h2 className="r-card-title">Pain Timeline</h2>
+          <p className="r-card-sub" style={{ marginBottom: '1.5rem' }}>Pain intensity across your logged entries</p>
           <div className="r-timeline-chart">
             {SAMPLE_ENTRIES.slice().reverse().map((e, i) => (
               <div key={i} className="r-chart-col">
@@ -137,13 +143,8 @@ export default function Report() {
 
         {/* Symptom Frequency */}
         <div className="r-card r-animate">
-          <div className="r-card-header">
-            <div className="r-card-icon" style={{ background: '#f5f3ff' }}>S</div>
-            <div>
-              <h2 className="r-card-title">Symptom Frequency</h2>
-              <p className="r-card-sub">How often each symptom appeared</p>
-            </div>
-          </div>
+          <h2 className="r-card-title">Symptom Frequency</h2>
+          <p className="r-card-sub" style={{ marginBottom: '1.25rem' }}>How often each symptom appeared</p>
           <div className="r-symptom-bars">
             {allSymptoms.map(sym => {
               const count = SAMPLE_ENTRIES.filter(e => e.symptoms.includes(sym)).length;
@@ -161,15 +162,10 @@ export default function Report() {
           </div>
         </div>
 
-        {/* Full Timeline */}
+        {/* Full Log */}
         <div className="r-card r-animate">
-          <div className="r-card-header">
-            <div className="r-card-icon" style={{ background: '#fce4ec' }}>L</div>
-            <div>
-              <h2 className="r-card-title">Full Symptom Log</h2>
-              <p className="r-card-sub">{SAMPLE_ENTRIES.length} entries — most recent first</p>
-            </div>
-          </div>
+          <h2 className="r-card-title">Full Symptom Log</h2>
+          <p className="r-card-sub" style={{ marginBottom: '1.25rem' }}>{SAMPLE_ENTRIES.length} entries — most recent first</p>
           <div className="r-entries">
             {SAMPLE_ENTRIES.map((e, i) => (
               <div key={i} className="r-entry">
@@ -186,45 +182,27 @@ export default function Report() {
                     {e.symptoms.map(s => <span key={s} className="r-tag r-tag-symptom">{s}</span>)}
                     {e.triggers.map(t => <span key={t} className="r-tag r-tag-trigger">{t}</span>)}
                   </div>
-                  {e.note && <p className="r-entry-note">"{e.note}"</p>}
+                  {e.note && <p className="r-entry-note">&quot;{e.note}&quot;</p>}
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Generate / Export */}
+        {/* Copy */}
         <div className="r-export r-animate">
-          <div className="r-export-left">
-            <div className="r-export-icon">R</div>
-            <div>
-              <div className="r-export-title">Ready to share with your doctor?</div>
-              <div className="r-export-sub">Generate a clean summary or copy the full report text.</div>
-            </div>
+          <div>
+            <div className="r-export-title">Ready to share?</div>
+            <div className="r-export-sub">Copy the full report as plain text to paste into an email or document for your doctor.</div>
           </div>
-          <div className="r-export-btns">
-            <button className="r-copy-btn" onClick={handleCopy}>
-              {copied ? 'Copied!' : 'Copy Report'}
-            </button>
-            <button className="btn-primary r-gen-btn" onClick={handleGenerate}>
-              {generated ? 'Report Ready' : 'Download PDF'}
-            </button>
-          </div>
+          <button className="btn-primary" onClick={handleCopy} style={{ whiteSpace: 'nowrap' }}>
+            {copied ? 'Copied to clipboard' : 'Copy Full Report'}
+          </button>
         </div>
-
-        {generated && (
-          <div className="r-generated r-animate">
-            <div className="r-gen-icon">Done</div>
-            <div>
-              <div className="r-gen-title">Your report has been generated!</div>
-              <div className="r-gen-sub">In a full version this would download as a PDF. For now, use "Copy Report" to paste into any document.</div>
-            </div>
-          </div>
-        )}
 
         {/* Disclaimer */}
         <div className="r-disclaimer">
-          <p>This report is intended to support conversations with your healthcare provider, not replace medical advice. Always consult a qualified medical professional.</p>
+          <p>This report supports conversations with your healthcare provider. It does not replace medical advice. Always consult a qualified medical professional.</p>
         </div>
 
       </div>

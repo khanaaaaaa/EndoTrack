@@ -51,12 +51,18 @@ export default function Patterns() {
   const today = new Date();
   const [viewMonth, setViewMonth]       = useState(today.getMonth());
   const [viewYear, setViewYear]         = useState(today.getFullYear());
-  const [periodStart, setPeriodStart]   = useState<string | null>(null);
-  const [periodLength, setPeriodLength] = useState(5);
-  const [cycleLength, setCycleLength]   = useState(28);
-  const [loggedDays, setLoggedDays]     = useState<string[]>([]);
+  const [periodStart, setPeriodStartRaw]   = useState<string | null>(() => typeof window !== 'undefined' ? localStorage.getItem('endo_period_start') : null);
+  const [periodLength, setPeriodLengthRaw] = useState<number>(() => typeof window !== 'undefined' ? Number(localStorage.getItem('endo_period_len') || 5) : 5);
+  const [cycleLength, setCycleLengthRaw]   = useState<number>(() => typeof window !== 'undefined' ? Number(localStorage.getItem('endo_cycle_len') || 28) : 28);
+  const [loggedDays, setLoggedDaysRaw]     = useState<string[]>(() => { try { return JSON.parse(typeof window !== 'undefined' ? localStorage.getItem('endo_logged') || '[]' : '[]'); } catch { return []; } });
   const [hoveredDay, setHoveredDay]     = useState<number | null>(null);
   const [showSetup, setShowSetup]       = useState(false);
+  const [pickingStart, setPickingStart] = useState(false);
+
+  const setPeriodStart = (v: string | null) => { setPeriodStartRaw(v); if (v) localStorage.setItem('endo_period_start', v); else localStorage.removeItem('endo_period_start'); };
+  const setPeriodLength = (fn: (n: number) => number) => { setPeriodLengthRaw(prev => { const next = fn(prev); localStorage.setItem('endo_period_len', String(next)); return next; }); };
+  const setCycleLength  = (fn: (n: number) => number) => { setCycleLengthRaw(prev => { const next = fn(prev); localStorage.setItem('endo_cycle_len', String(next)); return next; }); };
+  const setLoggedDays   = (fn: (prev: string[]) => string[]) => { setLoggedDaysRaw(prev => { const next = fn(prev); localStorage.setItem('endo_logged', JSON.stringify(next)); return next; }); };
 
   const daysInMonth  = getDaysInMonth(viewYear, viewMonth);
   const firstDaySlot = getFirstDayOfMonth(viewYear, viewMonth);
@@ -105,7 +111,12 @@ export default function Patterns() {
   const toKey = (day: number) =>
     `${viewYear}-${String(viewMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
 
-  const toggleLog = (day: number) => {
+  const handleDayClick = (day: number) => {
+    if (pickingStart) {
+      setPeriodStart(toKey(day));
+      setPickingStart(false);
+      return;
+    }
     const key = toKey(day);
     setLoggedDays(prev => prev.includes(key) ? prev.filter(d => d !== key) : [...prev, key]);
   };
@@ -147,20 +158,42 @@ export default function Patterns() {
             <h1 className="p-title">Pattern Pulse</h1>
             <p className="p-sub">Track your cycle, spot patterns, predict what&apos;s next.</p>
           </div>
-          <button className="p-setup-btn" onClick={() => setShowSetup(s => !s)}>Cycle Setup</button>
+          <button className="p-setup-btn" onClick={() => { setShowSetup(s => !s); setPickingStart(false); }}>Cycle Setup</button>
         </div>
+
+        {/* Period start picker banner */}
+        {pickingStart && (
+          <div className="p-pick-banner p-animate">
+            Tap any day on the calendar to set your period start date.
+            <button onClick={() => setPickingStart(false)}>Cancel</button>
+          </div>
+        )}
 
         {showSetup && (
           <div className="p-setup-card p-animate">
             <h2 className="p-setup-title">Cycle Settings</h2>
+
+            {/* Period start — tap on calendar */}
+            <div className="p-setup-field" style={{ marginBottom: '1.25rem' }}>
+              <label className="p-setup-label">Period Start Date</label>
+              <div className="p-start-row">
+                <div className="p-start-display">
+                  {periodStart
+                    ? new Date(periodStart).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+                    : 'Not set'}
+                </div>
+                <button className="p-start-btn" onClick={() => { setPickingStart(true); setShowSetup(false); }}>
+                  {periodStart ? 'Change on calendar' : 'Tap a day on calendar'}
+                </button>
+                {periodStart && (
+                  <button className="p-start-clear" onClick={() => setPeriodStart(null)}>Clear</button>
+                )}
+              </div>
+            </div>
+
             <div className="p-setup-grid">
               <div className="p-setup-field">
-                <label className="p-setup-label">Period Start Date</label>
-                <input type="date" className="p-setup-input"
-                  value={periodStart||''} onChange={e => setPeriodStart(e.target.value)} />
-              </div>
-              <div className="p-setup-field">
-                <label className="p-setup-label">Period Length (days)</label>
+                <label className="p-setup-label">Period Length</label>
                 <div className="p-stepper">
                   <button onClick={() => setPeriodLength(l => Math.max(1,l-1))}>−</button>
                   <span>{periodLength} days</span>
@@ -168,7 +201,7 @@ export default function Patterns() {
                 </div>
               </div>
               <div className="p-setup-field">
-                <label className="p-setup-label">Cycle Length (days)</label>
+                <label className="p-setup-label">Cycle Length</label>
                 <div className="p-stepper">
                   <button onClick={() => setCycleLength(l => Math.max(20,l-1))}>−</button>
                   <span>{cycleLength} days</span>
@@ -217,8 +250,8 @@ export default function Patterns() {
 
               return (
                 <div key={day}
-                  className={['p-cal-day', isToday?'p-day-today':'', isPeriod?'p-day-period':'', isEstimated?'p-day-estimated':'', isOvulation?'p-day-ovulation':'', isLogged?'p-day-logged':''].join(' ')}
-                  onClick={() => toggleLog(day)}
+                  className={['p-cal-day', isToday?'p-day-today':'', isPeriod?'p-day-period':'', isEstimated?'p-day-estimated':'', isOvulation?'p-day-ovulation':'', isLogged?'p-day-logged':'', pickingStart?'p-day-pickable':''].join(' ')}
+                  onClick={() => handleDayClick(day)}
                   onMouseEnter={() => setHoveredDay(day)}
                   onMouseLeave={() => setHoveredDay(null)}
                 >
