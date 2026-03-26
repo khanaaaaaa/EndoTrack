@@ -7,11 +7,6 @@ const MONTHS = ['January','February','March','April','May','June','July','August
 
 function getDaysInMonth(y: number, m: number)  { return new Date(y, m + 1, 0).getDate(); }
 function getFirstDayOfMonth(y: number, m: number) { return new Date(y, m, 1).getDay(); }
-function parseDate(s: string) {
-  const [y, m, d] = s.split('-').map(Number);
-  return new Date(y, m - 1, d);
-}
-
 function BunnySVG({ className }: { className: string }) {
   return (
     <div className={`bunny-wrap ${className}`}>
@@ -41,7 +36,6 @@ export default function Patterns() {
   const [periodLength,   setPeriodLengthRaw]   = useState<number>(5);
   const [cycleLength,    setCycleLengthRaw]    = useState<number>(28);
   const [loggedDays,     setLoggedDaysRaw]     = useState<string[]>([]);
-  const [hoveredDay,     setHoveredDay]        = useState<number | null>(null);
 
   // Load from localStorage after mount
   useEffect(() => {
@@ -63,6 +57,8 @@ export default function Patterns() {
   const daysInMonth  = getDaysInMonth(viewYear, viewMonth);
   const firstDaySlot = getFirstDayOfMonth(viewYear, viewMonth);
 
+  const toISO = (d: Date) =>
+    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
   const toKey = (day: number) =>
     `${viewYear}-${String(viewMonth + 1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
 
@@ -263,8 +259,6 @@ export default function Patterns() {
                     !periodStart ? 'p-day-pickable' : '',
                   ].join(' ')}
                   onClick={() => periodStart ? handleDayClick(day) : (setPeriodStart(toKey(day)))}
-                  onMouseEnter={() => setHoveredDay(day)}
-                  onMouseLeave={() => setHoveredDay(null)}
                 >
                   <span className="p-day-num">{day}</span>
                   {isBunnyStart && <BunnySVG className="bunny-start" />}
