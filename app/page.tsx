@@ -146,7 +146,7 @@ export default function Home() {
           </p>
           <p className="quote-sub">
             Consistent tracking gives you the evidence to advocate for yourself.
-            On average, endometriosis takes 7–10 years to diagnose — your data can help change that.
+            On average, endometriosis takes 7–10 years to diagnose, your data can help change that.
           </p>
         </div>
 

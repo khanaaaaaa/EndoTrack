@@ -599,3 +599,13 @@
   border-color: #e91e8c !important;
   transform: scale(1.05);
 }
+
+.p-day-fertile {
+  background: #dcfce7;
+  border-color: #4ade80;
+}
+
+.p-day-pms {
+  background: #f3e8ff;
+  border-color: #c084fc;
+}
