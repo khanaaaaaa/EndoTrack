@@ -1,6 +1,6 @@
 'use client';
 import './patterns.css';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const DAYS   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -34,13 +34,25 @@ export default function Patterns() {
   const [viewMonth, setViewMonth] = useState(today.getMonth());
   const [viewYear,  setViewYear]  = useState(today.getFullYear());
 
-  const [periodStart,    setPeriodStartRaw]    = useState<string | null>(() => typeof window !== 'undefined' ? localStorage.getItem('endo_period_start') : null);
-  const [periodLength,   setPeriodLengthRaw]   = useState<number>(() => typeof window !== 'undefined' ? Number(localStorage.getItem('endo_period_len')   || 5)  : 5);
-  const [cycleLength,    setCycleLengthRaw]    = useState<number>(() => typeof window !== 'undefined' ? Number(localStorage.getItem('endo_cycle_len')    || 28) : 28);
-  const [loggedDays,     setLoggedDaysRaw]     = useState<string[]>(() => { try { return JSON.parse(typeof window !== 'undefined' ? localStorage.getItem('endo_logged') || '[]' : '[]'); } catch { return []; } });
+  const [periodStart,    setPeriodStartRaw]    = useState<string | null>(null);
+  const [periodLength,   setPeriodLengthRaw]   = useState<number>(5);
+  const [cycleLength,    setCycleLengthRaw]    = useState<number>(28);
+  const [loggedDays,     setLoggedDaysRaw]     = useState<string[]>([]);
   const [showSetup,      setShowSetup]         = useState(false);
   const [pickingStart,   setPickingStart]      = useState(false);
   const [hoveredDay,     setHoveredDay]        = useState<number | null>(null);
+
+  // Load from localStorage after mount
+  useEffect(() => {
+    const ps = localStorage.getItem('endo_period_start');
+    const pl = localStorage.getItem('endo_period_len');
+    const cl = localStorage.getItem('endo_cycle_len');
+    const ld = localStorage.getItem('endo_logged');
+    if (ps) setPeriodStartRaw(ps);
+    if (pl) setPeriodLengthRaw(Number(pl));
+    if (cl) setCycleLengthRaw(Number(cl));
+    if (ld) { try { setLoggedDaysRaw(JSON.parse(ld)); } catch {} }
+  }, []);
 
   const setPeriodStart  = (v: string | null) => { setPeriodStartRaw(v); if (v) localStorage.setItem('endo_period_start', v); else localStorage.removeItem('endo_period_start'); };
   const setPeriodLength = (fn: (n: number) => number) => setPeriodLengthRaw(prev => { const next = fn(prev); localStorage.setItem('endo_period_len', String(next)); return next; });
