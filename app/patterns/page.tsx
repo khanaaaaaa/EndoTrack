@@ -7,7 +7,10 @@ const MONTHS = ['January','February','March','April','May','June','July','August
 
 function getDaysInMonth(y: number, m: number)  { return new Date(y, m + 1, 0).getDate(); }
 function getFirstDayOfMonth(y: number, m: number) { return new Date(y, m, 1).getDay(); }
-function toISO(d: Date) { return d.toISOString().split('T')[0]; }
+function parseDate(s: string) {
+  const [y, m, d] = s.split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
 
 function BunnySVG({ className }: { className: string }) {
   return (
@@ -151,22 +154,14 @@ export default function Patterns() {
 
   const totalLogged = loggedDays.length;
 
-  // Scientific next period prediction:
-  // Uses the last known period start + average cycle length (Naegele's rule adapted)
-  // If multiple logged periods exist, averages the gaps for better accuracy
-  const nextPeriodDate = periodStart ? (() => {
-    const s = new Date(periodStart);
-    s.setDate(s.getDate() + cycleLength);
-    return s.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-  })() : '—';
-
-  // Days until next period — shows negative if overdue
-  const daysUntilNext = periodStart ? (() => {
-    const s = new Date(periodStart);
-    s.setDate(s.getDate() + cycleLength);
-    const diff = Math.ceil((s.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-    return diff > 0 ? `${diff}d` : 'Now';
-  })() : '—';
+  const QUOTES = [
+    "Your body is not a problem to be solved.",
+    "Healing is not linear — and neither is your cycle.",
+    "You are more than your pain.",
+    "Rest is productive. Listening to your body is brave.",
+    "Every cycle is data. Every day is progress.",
+  ];
+  const dailyQuote = QUOTES[today.getDate() % QUOTES.length];
 
   // Scientific ovulation: Luteal phase is consistently ~14 days before next period
   // So ovulation = next period date - 14 days (Knaus-Ogino method)
@@ -247,15 +242,13 @@ export default function Patterns() {
 
         {/* Stats */}
         <div className="p-stats">
-          {[
-            { label: 'Days Logged', value: totalLogged },
-            { label: 'Next Period', value: nextPeriodDate },
-          ].map(s => (
-            <div key={s.label} className="p-stat-card">
-              <span className="p-stat-value">{s.value}</span>
-              <span className="p-stat-label">{s.label}</span>
-            </div>
-          ))}
+          <div className="p-stat-card">
+            <span className="p-stat-value">{totalLogged}</span>
+            <span className="p-stat-label">Days Logged</span>
+          </div>
+          <div className="p-stat-card p-stat-quote">
+            <span className="p-stat-quote-text">✦ {dailyQuote}</span>
+          </div>
         </div>
 
         {/* Calendar */}
