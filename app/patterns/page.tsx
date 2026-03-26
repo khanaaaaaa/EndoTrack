@@ -41,8 +41,6 @@ export default function Patterns() {
   const [periodLength,   setPeriodLengthRaw]   = useState<number>(5);
   const [cycleLength,    setCycleLengthRaw]    = useState<number>(28);
   const [loggedDays,     setLoggedDaysRaw]     = useState<string[]>([]);
-  const [showSetup,      setShowSetup]         = useState(false);
-  const [pickingStart,   setPickingStart]      = useState(false);
   const [hoveredDay,     setHoveredDay]        = useState<number | null>(null);
 
   // Load from localStorage after mount
@@ -154,20 +152,9 @@ export default function Patterns() {
 
   const totalLogged = loggedDays.length;
 
-  const QUOTES = [
-    "Your body is not a problem to be solved.",
-    "Healing is not linear — and neither is your cycle.",
-    "You are more than your pain.",
-    "Rest is productive. Listening to your body is brave.",
-    "Every cycle is data. Every day is progress.",
-  ];
-  const dailyQuote = QUOTES[today.getDate() % QUOTES.length];
-
-  // Scientific ovulation: Luteal phase is consistently ~14 days before next period
-  // So ovulation = next period date - 14 days (Knaus-Ogino method)
-  const ovulationDateStr = periodStart ? (() => {
+  const nextPeriodDate = periodStart ? (() => {
     const s = new Date(periodStart);
-    s.setDate(s.getDate() + cycleLength - 14);
+    s.setDate(s.getDate() + cycleLength);
     return s.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   })() : '—';
 
@@ -191,67 +178,41 @@ export default function Patterns() {
             <h1 className="p-title">Cycle Patterns</h1>
             <p className="p-sub">Track your period, predict your cycle, understand your body.</p>
           </div>
-          <button className="p-setup-btn" onClick={() => { setShowSetup(s => !s); setPickingStart(false); }}>
-            Cycle Setup
-          </button>
         </div>
 
-        {pickingStart && (
-          <div className="p-pick-banner p-animate">
-            Tap any day on the calendar to set your period start date.
-            <button onClick={() => setPickingStart(false)}>Cancel</button>
+        {/* Cycle Setup — always visible */}
+        <div className="p-setup-card">
+          <h2 className="p-setup-title">Cycle Setup</h2>
+          <div className="p-setup-field" style={{ marginBottom: '1.25rem' }}>
+            <label className="p-setup-label">Period Start Date</label>
+            <div className="p-start-row">
+              <div className="p-start-display">
+                {periodStart ? new Date(periodStart).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'Not set — pick a day on the calendar below'}
+              </div>
+              {periodStart && <button className="p-start-clear" onClick={() => setPeriodStart(null)}>Clear</button>}
+            </div>
           </div>
-        )}
-
-        {showSetup && (
-          <div className="p-setup-card p-animate">
-            <h2 className="p-setup-title">Cycle Settings</h2>
-            <div className="p-setup-field" style={{ marginBottom: '1.25rem' }}>
-              <label className="p-setup-label">Period Start Date</label>
-              <div className="p-start-row">
-                <div className="p-start-display">
-                  {periodStart ? new Date(periodStart).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'Not set'}
-                </div>
-                <button className="p-start-btn" onClick={() => { setPickingStart(true); setShowSetup(false); }}>
-                  {periodStart ? 'Change on calendar' : 'Tap a day on calendar'}
-                </button>
-                {periodStart && <button className="p-start-clear" onClick={() => setPeriodStart(null)}>Clear</button>}
+          <div className="p-setup-grid">
+            <div className="p-setup-field">
+              <label className="p-setup-label">Period Length</label>
+              <div className="p-stepper">
+                <button onClick={() => setPeriodLength(l => Math.max(1, l - 1))}>−</button>
+                <span>{periodLength} days</span>
+                <button onClick={() => setPeriodLength(l => Math.min(10, l + 1))}>+</button>
               </div>
             </div>
-            <div className="p-setup-grid">
-              <div className="p-setup-field">
-                <label className="p-setup-label">Period Length</label>
-                <div className="p-stepper">
-                  <button onClick={() => setPeriodLength(l => Math.max(1, l - 1))}>−</button>
-                  <span>{periodLength} days</span>
-                  <button onClick={() => setPeriodLength(l => Math.min(10, l + 1))}>+</button>
-                </div>
-              </div>
-              <div className="p-setup-field">
-                <label className="p-setup-label">Cycle Length</label>
-                <div className="p-stepper">
-                  <button onClick={() => setCycleLength(l => Math.max(20, l - 1))}>−</button>
-                  <span>{cycleLength} days</span>
-                  <button onClick={() => setCycleLength(l => Math.min(40, l + 1))}>+</button>
-                </div>
+            <div className="p-setup-field">
+              <label className="p-setup-label">Cycle Length</label>
+              <div className="p-stepper">
+                <button onClick={() => setCycleLength(l => Math.max(20, l - 1))}>−</button>
+                <span>{cycleLength} days</span>
+                <button onClick={() => setCycleLength(l => Math.min(40, l + 1))}>+</button>
               </div>
             </div>
-            <button className="p-setup-save" onClick={() => setShowSetup(false)}>Save & Close</button>
-          </div>
-        )}
-
-        {/* Stats */}
-        <div className="p-stats">
-          <div className="p-stat-card">
-            <span className="p-stat-value">{totalLogged}</span>
-            <span className="p-stat-label">Days Logged</span>
-          </div>
-          <div className="p-stat-card p-stat-quote">
-            <span className="p-stat-quote-text">✦ {dailyQuote}</span>
           </div>
         </div>
 
-        {/* Calendar */}
+        {/* Calendar — always visible; clicking sets start date if not set, otherwise logs */}
         <div className="p-cal-card p-animate">
           <div className="p-cal-nav">
             <button className="p-cal-arrow" onClick={prevMonth}>‹</button>
@@ -286,9 +247,9 @@ export default function Patterns() {
                     isFertile ? 'p-day-fertile'  : '',
                     isPMS     ? 'p-day-pms'      : '',
                     isLogged  ? 'p-day-logged'   : '',
-                    pickingStart ? 'p-day-pickable' : '',
+                    !periodStart ? 'p-day-pickable' : '',
                   ].join(' ')}
-                  onClick={() => handleDayClick(day)}
+                  onClick={() => periodStart ? handleDayClick(day) : (setPeriodStart(toKey(day)))}
                   onMouseEnter={() => setHoveredDay(day)}
                   onMouseLeave={() => setHoveredDay(null)}
                 >
@@ -302,6 +263,20 @@ export default function Patterns() {
           </div>
 
         </div>
+
+        {/* Stats — only after setup */}
+        {periodStart && (
+          <div className="p-stats">
+            <div className="p-stat-card">
+              <span className="p-stat-value">{totalLogged}</span>
+              <span className="p-stat-label">Days Logged</span>
+            </div>
+            <div className="p-stat-card">
+              <span className="p-stat-value">{nextPeriodDate}</span>
+              <span className="p-stat-label">Next Period</span>
+            </div>
+          </div>
+        )}
 
         {/* Pain Wave */}
         <div className="p-wave-card">

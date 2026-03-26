@@ -142,16 +142,15 @@
 /* Stats */
 .p-stats {
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: repeat(2, 1fr);
   gap: 1rem;
-  align-items: stretch;
 }
 
 .p-stat-card {
   background: white;
   border: 1px solid #fce4ec;
   border-radius: 16px;
-  padding: 1.25rem 1.5rem;
+  padding: 1.25rem 1rem;
   text-align: center;
   display: flex;
   flex-direction: column;
@@ -161,20 +160,6 @@
 
 .p-stat-value { font-size: 1.4rem; font-weight: 800; color: #e91e8c; }
 .p-stat-label { font-size: 0.75rem; color: #b07a90; font-weight: 500; }
-
-.p-stat-quote {
-  text-align: left;
-  justify-content: center;
-  background: linear-gradient(135deg, #fff0f7, #fce4ec);
-}
-
-.p-stat-quote-text {
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: #c2185b;
-  font-style: italic;
-  line-height: 1.5;
-}
 
 /* Calendar */
 .p-cal-card {
