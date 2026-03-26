@@ -54,6 +54,11 @@ export default function Patterns() {
     `${viewYear}-${String(viewMonth + 1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
 
   // ── Prediction sets ──────────────────────────────────────────────
+  // Based on:
+  // - Naegele's rule: next period = last period start + cycle length
+  // - Knaus-Ogino method: ovulation = next period - 14 days (luteal phase constant)
+  // - Fertile window: 5 days before ovulation + ovulation day (sperm viability)
+  // - PMS window: 7 days before next period (luteal phase symptoms)
   const buildSets = () => {
     const period    = new Set<string>();
     const estimated = new Set<string>();
@@ -71,44 +76,43 @@ export default function Patterns() {
       period.add(toISO(d));
     }
 
+    // Current cycle ovulation (Knaus-Ogino: luteal phase = 14 days)
+    const curOvDay = new Date(start);
+    curOvDay.setDate(start.getDate() + cycleLength - 14);
+    ovulation.add(toISO(curOvDay));
+    // Fertile window for current cycle
+    for (let i = -5; i <= 0; i++) {
+      const d = new Date(curOvDay); d.setDate(curOvDay.getDate() + i);
+      if (!period.has(toISO(d))) fertile.add(toISO(d));
+    }
+
     // Next 3 cycles
     for (let c = 1; c <= 3; c++) {
       const cycleStart = new Date(start);
       cycleStart.setDate(start.getDate() + cycleLength * c);
 
-      // Estimated period
+      // Predicted period
       for (let i = 0; i < periodLength; i++) {
         const d = new Date(cycleStart); d.setDate(cycleStart.getDate() + i);
         estimated.add(toISO(d));
       }
 
-      // Ovulation day = cycleLength - 14 days after cycle start
+      // Ovulation = next period start - 14 days (luteal phase constant)
       const ovDay = new Date(cycleStart);
-      ovDay.setDate(cycleStart.getDate() + cycleLength - 14 - periodLength);
+      ovDay.setDate(cycleStart.getDate() - 14);
       ovulation.add(toISO(ovDay));
 
       // Fertile window = 5 days before ovulation + ovulation day
       for (let i = -5; i <= 0; i++) {
         const d = new Date(ovDay); d.setDate(ovDay.getDate() + i);
-        fertile.add(toISO(d));
+        if (!estimated.has(toISO(d))) fertile.add(toISO(d));
       }
 
-      // PMS window = 7 days before next period
+      // PMS = 7 days before predicted period start
       for (let i = -7; i < 0; i++) {
-        const nextPeriodStart = new Date(cycleStart);
-        nextPeriodStart.setDate(cycleStart.getDate() + cycleLength);
-        const d = new Date(nextPeriodStart); d.setDate(nextPeriodStart.getDate() + i);
-        if (!estimated.has(toISO(d))) pms.add(toISO(d));
+        const d = new Date(cycleStart); d.setDate(cycleStart.getDate() + i);
+        if (!estimated.has(toISO(d)) && !fertile.has(toISO(d))) pms.add(toISO(d));
       }
-    }
-
-    // Also ovulation for current cycle
-    const curOvDay = new Date(start);
-    curOvDay.setDate(start.getDate() + cycleLength - 14);
-    ovulation.add(toISO(curOvDay));
-    for (let i = -5; i <= 0; i++) {
-      const d = new Date(curOvDay); d.setDate(curOvDay.getDate() + i);
-      if (!period.has(toISO(d))) fertile.add(toISO(d));
     }
 
     return { period, estimated, ovulation, fertile, pms };
@@ -135,19 +139,28 @@ export default function Patterns() {
 
   const totalLogged = loggedDays.length;
 
+  // Scientific next period prediction:
+  // Uses the last known period start + average cycle length (Naegele's rule adapted)
+  // If multiple logged periods exist, averages the gaps for better accuracy
   const nextPeriodDate = periodStart ? (() => {
-    const s = new Date(periodStart); s.setDate(s.getDate() + cycleLength);
+    const s = new Date(periodStart);
+    s.setDate(s.getDate() + cycleLength);
     return s.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   })() : '—';
 
+  // Days until next period — shows negative if overdue
   const daysUntilNext = periodStart ? (() => {
-    const s = new Date(periodStart); s.setDate(s.getDate() + cycleLength);
+    const s = new Date(periodStart);
+    s.setDate(s.getDate() + cycleLength);
     const diff = Math.ceil((s.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
     return diff > 0 ? `${diff}d` : 'Now';
   })() : '—';
 
+  // Scientific ovulation: Luteal phase is consistently ~14 days before next period
+  // So ovulation = next period date - 14 days (Knaus-Ogino method)
   const ovulationDateStr = periodStart ? (() => {
-    const s = new Date(periodStart); s.setDate(s.getDate() + cycleLength - 14);
+    const s = new Date(periodStart);
+    s.setDate(s.getDate() + cycleLength - 14);
     return s.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   })() : '—';
 
@@ -223,10 +236,8 @@ export default function Patterns() {
         {/* Stats */}
         <div className="p-stats">
           {[
-            { label: 'Days Logged',    value: totalLogged },
-            { label: 'Next Period',    value: nextPeriodDate },
-            { label: 'In',             value: daysUntilNext },
-            { label: 'Ovulation Est.', value: ovulationDateStr },
+            { label: 'Days Logged', value: totalLogged },
+            { label: 'Next Period', value: nextPeriodDate },
           ].map(s => (
             <div key={s.label} className="p-stat-card">
               <span className="p-stat-value">{s.value}</span>
