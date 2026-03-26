@@ -134,7 +134,6 @@ export default function Patterns() {
   const { period: periodDays, estimated: estimatedDays, ovulation: ovulationDays, fertile: fertileDays, pms: pmsDays } = buildSets();
 
   const handleDayClick = (day: number) => {
-    if (pickingStart) { setPeriodStart(toKey(day)); setPickingStart(false); return; }
     const key = toKey(day);
     setLoggedDays(prev => prev.includes(key) ? prev.filter(d => d !== key) : [...prev, key]);
   };
@@ -212,7 +211,21 @@ export default function Patterns() {
           </div>
         </div>
 
-        {/* Calendar — always visible; clicking sets start date if not set, otherwise logs */}
+        {/* Stats — only after setup */}
+        {periodStart && (
+          <div className="p-stats">
+            <div className="p-stat-card">
+              <span className="p-stat-value">{totalLogged}</span>
+              <span className="p-stat-label">Days Logged</span>
+            </div>
+            <div className="p-stat-card">
+              <span className="p-stat-value">{nextPeriodDate}</span>
+              <span className="p-stat-label">Next Period</span>
+            </div>
+          </div>
+        )}
+
+        {/* Calendar */}
         <div className="p-cal-card p-animate">
           <div className="p-cal-nav">
             <button className="p-cal-arrow" onClick={prevMonth}>‹</button>
@@ -263,20 +276,6 @@ export default function Patterns() {
           </div>
 
         </div>
-
-        {/* Stats — only after setup */}
-        {periodStart && (
-          <div className="p-stats">
-            <div className="p-stat-card">
-              <span className="p-stat-value">{totalLogged}</span>
-              <span className="p-stat-label">Days Logged</span>
-            </div>
-            <div className="p-stat-card">
-              <span className="p-stat-value">{nextPeriodDate}</span>
-              <span className="p-stat-label">Next Period</span>
-            </div>
-          </div>
-        )}
 
         {/* Pain Wave */}
         <div className="p-wave-card">
