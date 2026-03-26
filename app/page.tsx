@@ -88,11 +88,7 @@ export default function Home() {
                 title: 'Health Insights',
                 desc: 'See which symptoms are recurring, escalating, or being dismissed. Know when to push for further evaluation.',
               },
-              {
-                href: '/report',
-                title: 'Doctor Report',
-                desc: 'A clear, structured symptom timeline you can bring to any appointment to support your case.',
-              },
+
             ].map(c => (
               <a key={c.href} href={c.href} className="feature-link">
                 <div className="card feature-card h-tool-card">
@@ -113,7 +109,7 @@ export default function Home() {
               { n: '01', title: 'Log daily', desc: 'Use the Journal to record your pain level, mood, symptoms and what triggered them.' },
               { n: '02', title: 'Set your cycle', desc: 'In Patterns, tap your period start date on the calendar to activate cycle tracking.' },
               { n: '03', title: 'Review insights', desc: 'Check Insights regularly to see patterns your doctor should know about.' },
-              { n: '04', title: 'Bring your report', desc: 'Before any appointment, open Report to see your full symptom history in one place.' },
+              { n: '04', title: 'Review your history', desc: 'Open the Report page to see your full symptom log and share it with your doctor.' },
             ].map(s => (
               <div key={s.n} className="h-step">
                 <div className="h-step-num">{s.n}</div>
@@ -133,7 +129,6 @@ export default function Home() {
             {[
               { name: 'Endometriosis Foundation of America', url: 'https://www.endofound.org', desc: 'Research, education and advocacy.' },
               { name: 'World Endometriosis Society', url: 'https://endometriosis.ca', desc: 'Global clinical and research standards.' },
-              { name: 'Nancy\'s Nook', url: 'https://nancysnookendo.com', desc: 'Patient education and specialist directory.' },
               { name: 'Endometriosis UK', url: 'https://www.endometriosis-uk.org', desc: 'Support, helpline and local groups.' },
             ].map(r => (
               <a key={r.name} href={r.url} target="_blank" rel="noopener noreferrer" className="h-resource">

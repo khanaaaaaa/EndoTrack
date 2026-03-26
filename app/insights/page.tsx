@@ -62,7 +62,6 @@ export default function Insights() {
                 <div className="i-alert-desc">{highCount} high-priority pattern{highCount > 1 ? 's' : ''} detected. These symptoms have been flagged as potentially significant and warrant medical evaluation.</div>
               </div>
             </div>
-            <a href="/report" className="btn-primary i-alert-btn">Generate Report</a>
           </div>
         )}
 
@@ -140,7 +139,6 @@ export default function Insights() {
         <div className="i-validation">
           <h2 className="i-validation-title">You know your body best.</h2>
           <p className="i-validation-text">These insights are here to help you advocate for yourself. If something feels wrong, it deserves to be taken seriously — by you and by your doctor.</p>
-          <a href="/report" className="btn-primary">Generate Doctor Report</a>
         </div>
 
       </div>
