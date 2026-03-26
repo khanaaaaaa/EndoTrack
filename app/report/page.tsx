@@ -5,7 +5,7 @@ import { useState } from 'react';
 const SAMPLE_ENTRIES = [
   { date: 'Mar 15, 2025', pain: 8, mood: 'Frustrated', symptoms: ['Cramping', 'Bloating', 'Back Pain'], triggers: ['Period'], note: 'Sharp pain during my period again. Doctor said it\'s normal but it\'s getting worse every month.' },
   { date: 'Mar 12, 2025', pain: 5, mood: 'Anxious',    symptoms: ['Fatigue', 'Headache'],               triggers: ['Stress'], note: 'Exhausted all day. Hard to focus at work.' },
-  { date: 'Mar 8, 2025',  pain: 9, mood: 'Very Low',   symptoms: ['Stabbing Pain', 'Nausea', 'Bloating'], triggers: ['Period', 'Sex'], note: 'Worst pain this month. Had to leave work early. This is not normal.' },
+  { date: 'Mar 8, 2025',  pain: 9, mood: 'Very Low',   symptoms: ['Stabbing Pain', 'Nausea', 'Bloating'], triggers: ['Period'], note: 'Worst pain this month. Had to leave work early. This is not normal.' },
   { date: 'Feb 18, 2025', pain: 7, mood: 'Frustrated', symptoms: ['Cramping', 'Pressure'],              triggers: ['Period'], note: 'Period started again. Same pain as last month. Told it\'s just cramps.' },
   { date: 'Feb 10, 2025', pain: 4, mood: 'Neutral',    symptoms: ['Bloating', 'Fatigue'],               triggers: ['Food'],   note: 'Bloating after eating. Uncomfortable all evening.' },
   { date: 'Jan 20, 2025', pain: 8, mood: 'Very Low',   symptoms: ['Cramping', 'Back Pain', 'Nausea'],   triggers: ['Period'], note: 'Period pain unbearable. Took 4 painkillers and still didn\'t help.' },

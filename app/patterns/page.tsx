@@ -285,64 +285,6 @@ export default function Patterns() {
             })}
           </div>
 
-          {/* Legend */}
-          <div className="p-legend">
-            {[
-              { color: '#fce4ec', border: '#e91e8c', label: 'Period' },
-              { color: '#ffeef8', border: '#f9a8d4', label: 'Predicted Period' },
-              { color: '#fef9c3', border: '#fbbf24', label: 'Ovulation' },
-              { color: '#dcfce7', border: '#4ade80', label: 'Fertile Window' },
-              { color: '#f3e8ff', border: '#c084fc', label: 'PMS Window' },
-              { color: '#f0fdf4', border: '#86efac', label: 'Logged' },
-            ].map(l => (
-              <div key={l.label} className="p-legend-item">
-                <div className="p-legend-dot" style={{ background: l.color, border: `1.5px solid ${l.border}` }} />
-                <span>{l.label}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Cycle Insights */}
-        <div>
-          <h2 className="p-insights-title">Cycle Insights</h2>
-          <div className="p-insights-grid">
-            {[
-              {
-                title: 'Current Period',
-                desc: periodStart
-                  ? `Started ${new Date(periodStart).toLocaleDateString('en-US',{month:'short',day:'numeric'})}. Expected to last ${periodLength} days.`
-                  : 'Set your period start date in Cycle Setup.',
-                color: '#fff0f3', border: '#fce4ec',
-              },
-              {
-                title: 'Next Period',
-                desc: periodStart
-                  ? `Estimated to start around ${nextPeriodDate} — ${daysUntilNext} away. Based on a ${cycleLength}-day cycle.`
-                  : 'Add your cycle data to see predictions.',
-                color: '#fdf4ff', border: '#f5d0fe',
-              },
-              {
-                title: 'Ovulation Window',
-                desc: periodStart
-                  ? `Estimated ovulation around ${ovulationDateStr}. Fertile window begins 5 days before.`
-                  : 'Set your period start to calculate ovulation.',
-                color: '#fefce8', border: '#fef08a',
-              },
-              {
-                title: 'PMS Window',
-                desc: periodStart
-                  ? `PMS symptoms may appear in the 7 days before your next period (around ${nextPeriodDate}).`
-                  : 'Set your cycle data to see your PMS window.',
-                color: '#faf5ff', border: '#e9d5ff',
-              },
-            ].map(c => (
-              <div key={c.title} className="p-insight-card" style={{ background: c.color, border: `1px solid ${c.border}` }}>
-                <div className="p-insight-title">{c.title}</div>
-                <div className="p-insight-desc">{c.desc}</div>
-              </div>
-            ))}
-          </div>
         </div>
 
         {/* Pain Wave */}

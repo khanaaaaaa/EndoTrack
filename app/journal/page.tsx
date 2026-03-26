@@ -2,7 +2,7 @@
 import './journal.css';
 import { useState } from 'react';
 
-const TRIGGERS = ['Period', 'Ovulation', 'Exercise', 'Stress', 'Food', 'Sex', 'Bowel', 'Urination', 'Standing', 'Sitting'];
+const TRIGGERS = ['Period', 'Ovulation', 'Exercise', 'Stress', 'Food', 'Bowel', 'Urination', 'Standing', 'Sitting'];
 const SYMPTOMS = ['Cramping', 'Bloating', 'Back Pain', 'Nausea', 'Fatigue', 'Headache', 'Spotting', 'Stabbing Pain', 'Pressure', 'Burning'];
 const MOODS = ['Very Low', 'Low', 'Neutral', 'Anxious', 'Frustrated', 'Okay', 'Good'];
 
