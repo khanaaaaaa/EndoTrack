@@ -1,5 +1,9 @@
 // ── DATA ──────────────────────────────────────────────────────────────────────
-const logs = JSON.parse(localStorage.getItem('endoLogs')) || [];
+// Wipe any legacy data that doesn't match current format (old app had mood/notes fields)
+const raw = JSON.parse(localStorage.getItem('endoLogs')) || [];
+const isLegacy = raw.some(l => l.mood !== undefined || l.notes !== undefined || typeof l.painLevel === 'undefined');
+if (isLegacy) localStorage.removeItem('endoLogs');
+const logs = isLegacy ? [] : raw;
 let symptomScore = 0;
 let doctorScore  = 0;
 
@@ -86,20 +90,7 @@ function scoreSymptoms() {
     navigate('symptom-result');
 }
 
-function buildJournalSymptomSummary() {
-    if (!logs.length) return '';
-    const avg = (logs.reduce((s, l) => s + l.painLevel, 0) / logs.length).toFixed(1);
-    const flares = logs.filter(l => l.painLevel >= 7).length;
-    const symCount = {};
-    logs.forEach(l => (l.symptoms || []).forEach(s => { symCount[s] = (symCount[s] || 0) + 1; }));
-    const topSyms = Object.entries(symCount).sort((a, b) => b[1] - a[1]).slice(0, 5);
-    return `
-        <div class="card">
-            <p class="label">From Your Journal (${logs.length} entries)</p>
-            <p class="body-text">Average pain: <strong>${avg}/10</strong> · Flare days: <strong>${flares}</strong></p>
-            ${topSyms.length ? `<p class="body-text mt">Most logged: ${topSyms.map(([s, n]) => `${s} (${n}×)`).join(', ')}</p>` : ''}
-        </div>`;
-}
+function buildJournalSymptomSummary() { return ''; }
 
 // ── DOCTOR CHECKER ────────────────────────────────────────────────────────────
 // dismissed = true means this response is a red flag / guideline violation
@@ -226,12 +217,7 @@ function renderNextSteps() {
             <p class="label">Before Your Next Appointment</p>
             ${checklist.map(c => `<p class="flag-item">· ${c}</p>`).join('')}
         </div>
-        ${logs.length ? `
-        <div class="card">
-            <p class="label">Use Your Journal Data</p>
-            <p class="body-text">You have <strong>${logs.length} symptom entries</strong> in your journal. Show this data to your doctor as structured evidence — average pain <strong>${(logs.reduce((s,l)=>s+l.painLevel,0)/logs.length).toFixed(1)}/10</strong>, flare days <strong>${logs.filter(l=>l.painLevel>=7).length}</strong>.</p>
-            <button class="btn-secondary" style="margin-top:12px;" onclick="navigate('journal')">View Full Journal →</button>
-        </div>` : ''}`;
+        <button class="btn-secondary" style="margin-top:4px;" onclick="navigate('journal')">View Full Journal →</button>`;
 }
 
 // ── JOURNAL ───────────────────────────────────────────────────────────────────
