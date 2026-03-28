@@ -246,7 +246,10 @@ function renderJournal() {
     const sorted = [...logs].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 6);
 
     el.innerHTML = `
-        <p class="section-label">${logs.length} entries — most recent first</p>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+            <p class="section-label" style="margin:0;">${logs.length} entries — most recent first</p>
+            <button onclick="clearJournal()" style="font-size:11px;color:var(--red);background:none;border:1px solid var(--red);border-radius:8px;padding:4px 10px;cursor:pointer;font-family:'DM Sans',sans-serif;">Clear All</button>
+        </div>
         ${sorted.map(log => {
             const date = new Date(log.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
             const painColor = log.painLevel >= 7 ? 'pain-high' : log.painLevel >= 4 ? 'pain-mid' : 'pain-low';
@@ -265,6 +268,14 @@ function renderJournal() {
             </div>`;
         }).join('')}
         ${logs.length > 6 ? `<p class="muted-text" style="text-align:center;padding:10px 0;">${logs.length - 6} older entries not shown</p>` : ''}`;
+}
+
+// ── CLEAR JOURNAL ────────────────────────────────────────────────────────────
+function clearJournal() {
+    if (!confirm('Clear all journal entries? This cannot be undone.')) return;
+    localStorage.removeItem('endoLogs');
+    logs.length = 0;
+    renderJournal();
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
