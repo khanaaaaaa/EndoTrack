@@ -23,8 +23,7 @@ export default function Journal() {
     setError('');
     if (current === 1 && pain === null) { setError('Please select a pain level before continuing.'); return; }
     if (current === 2 && mood === null) { setError('Please select a mood before continuing.'); return; }
-    if (current === 3 && symptoms.length === 0) { setError('Please select at least one symptom.'); return; }
-    if (current === 4 && triggers.length === 0) { setError('Please select at least one trigger.'); return; }
+
     setStep(current + 1);
   };
 
@@ -173,7 +172,6 @@ export default function Journal() {
               </div>
             </div>
 
-            <div className="j-required-note">At least one required</div>
             <div className="j-tag-grid">
               {SYMPTOMS.map(s => (
                 <button key={s} onClick={() => { toggle(s, symptoms, setSymptoms); setError(''); }}
@@ -185,6 +183,7 @@ export default function Journal() {
 
             <div className="j-nav-row">
               <button className="j-back-btn" onClick={() => { setStep(2); setError(''); }}>Back</button>
+              <button className="j-skip-btn" onClick={() => { setSymptoms([]); setStep(4); setError(''); }}>Skip</button>
               <button className="j-next-btn" onClick={() => tryNext(3)}>Continue to Triggers</button>
             </div>
           </div>
@@ -201,7 +200,6 @@ export default function Journal() {
               </div>
             </div>
 
-            <div className="j-required-note">At least one required</div>
             <div className="j-tag-grid">
               {TRIGGERS.map(t => (
                 <button key={t} onClick={() => { toggle(t, triggers, setTriggers); setError(''); }}
@@ -213,6 +211,7 @@ export default function Journal() {
 
             <div className="j-nav-row">
               <button className="j-back-btn" onClick={() => { setStep(3); setError(''); }}>Back</button>
+              <button className="j-skip-btn" onClick={() => { setTriggers([]); setStep(5); setError(''); }}>Skip</button>
               <button className="j-next-btn" onClick={() => tryNext(4)}>Continue to Note</button>
             </div>
           </div>

@@ -436,6 +436,19 @@
 
 .j-back-btn:hover { border-color: #e91e8c; color: #e91e8c; }
 
+.j-skip-btn {
+  background: transparent;
+  color: #b07a90;
+  border: none;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0.5rem;
+}
+
+.j-skip-btn:hover { color: #e91e8c; }
+
 .j-submit-btn {
   background: linear-gradient(135deg, #e91e8c, #f06292);
   color: white;
