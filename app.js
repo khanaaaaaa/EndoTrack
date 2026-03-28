@@ -1,9 +1,6 @@
 // ── DATA ──────────────────────────────────────────────────────────────────────
-// Wipe any legacy data that doesn't match current format (old app had mood/notes fields)
-const raw = JSON.parse(localStorage.getItem('endoLogs')) || [];
-const isLegacy = raw.some(l => l.mood !== undefined || l.notes !== undefined || typeof l.painLevel === 'undefined');
-if (isLegacy) localStorage.removeItem('endoLogs');
-const logs = isLegacy ? [] : raw;
+localStorage.removeItem('endoLogs');
+const logs = [];
 let symptomScore = 0;
 let doctorScore  = 0;
 
