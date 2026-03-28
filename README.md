@@ -4,7 +4,7 @@ Demo: https://endo-track-woad.vercel.app/
 
 # What It Is
 
-EndoTrack is a personalized care tool designed to help people with endometriosis track symptoms and turn their daily experiences into meaningful health insights.
+EndoTrack is a care tool that is designed to help women on their periods actually gather patterns and figure out if they are having normal period cramps or they might be having a chronic disease through data they enter.
 
 # Why I Made It
 

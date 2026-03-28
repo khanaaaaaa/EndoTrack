@@ -119,7 +119,7 @@ export default function Insights() {
         <div className="i-header">
           <div>
             <h1 className="i-title">Second Look Insights</h1>
-            <p className="i-sub">Patterns your symptoms are telling you — that should not be ignored.</p>
+            <p className="i-sub">Patterns your symptoms are telling you, that should not be ignored.</p>
           </div>
         </div>
 
