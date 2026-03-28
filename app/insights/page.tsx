@@ -160,9 +160,8 @@ export default function Insights() {
 
             {insights.length === 0 ? (
               <div className="i-empty">
-                <div className="i-empty-icon">✨</div>
                 <h2 className="i-empty-title">No patterns detected yet</h2>
-                <p className="i-empty-text">Keep logging — patterns emerge after a few consistent entries.</p>
+                <p className="i-empty-text">Keep logging, patterns emerge after a few consistent entries.</p>
               </div>
             ) : (
               <>
