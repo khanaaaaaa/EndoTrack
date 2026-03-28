@@ -1,10 +1,27 @@
 'use client';
 import './journal.css';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const TRIGGERS = ['Period', 'Ovulation', 'Exercise', 'Stress', 'Food', 'Bowel', 'Urination', 'Standing', 'Sitting'];
 const SYMPTOMS = ['Cramping', 'Bloating', 'Back Pain', 'Nausea', 'Fatigue', 'Headache', 'Spotting', 'Stabbing Pain', 'Pressure', 'Burning'];
 const MOODS = ['Very Low', 'Low', 'Neutral', 'Anxious', 'Frustrated', 'Okay', 'Good'];
+
+type Entry = { date: string; pain: number | null; mood: string | null; symptoms: string[]; triggers: string[]; note: string };
+
+const PAIN_COLOR = (p: number | null) => p === null ? '#e91e8c' : p <= 3 ? '#4ade80' : p <= 6 ? '#fb923c' : '#f43f5e';
+const PAIN_LABEL = (p: number | null) => p === null ? '' : p === 0 ? 'No Pain' : p <= 3 ? 'Mild' : p <= 6 ? 'Moderate' : p <= 8 ? 'Severe' : 'Unbearable';
+
+function calcStreak(entries: Entry[]): number {
+  if (entries.length === 0) return 0;
+  const days = new Set(entries.map(e => e.date.slice(0, 10)));
+  let streak = 0;
+  const d = new Date();
+  while (days.has(d.toISOString().slice(0, 10))) {
+    streak++;
+    d.setDate(d.getDate() - 1);
+  }
+  return streak;
+}
 
 export default function Journal() {
   const [step, setStep] = useState(1);
@@ -15,6 +32,11 @@ export default function Journal() {
   const [note, setNote] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
+  const [entries, setEntries] = useState<Entry[]>([]);
+
+  useEffect(() => {
+    setEntries(JSON.parse(localStorage.getItem('endo_entries') || '[]'));
+  }, []);
 
   const toggle = (item: string, list: string[], setList: (v: string[]) => void) =>
     setList(list.includes(item) ? list.filter(i => i !== item) : [...list, item]);
@@ -28,10 +50,10 @@ export default function Journal() {
   };
 
   const handleSubmit = () => {
-    if (!note.trim()) { setError('Please add a note before saving.'); return; }
-    const entry = { date: new Date().toISOString(), pain, mood: mood !== null ? MOODS[mood] : null, symptoms, triggers, note };
-    const existing = JSON.parse(localStorage.getItem('endo_entries') || '[]');
-    localStorage.setItem('endo_entries', JSON.stringify([entry, ...existing]));
+    const entry: Entry = { date: new Date().toISOString(), pain, mood: mood !== null ? MOODS[mood] : null, symptoms, triggers, note: note.trim() };
+    const updated = [entry, ...entries];
+    localStorage.setItem('endo_entries', JSON.stringify(updated));
+    setEntries(updated);
     setSubmitted(true);
     setTimeout(() => {
       setSubmitted(false);
@@ -39,8 +61,9 @@ export default function Journal() {
     }, 3000);
   };
 
-  const painColor = pain === null ? '#e91e8c' : pain <= 3 ? '#4ade80' : pain <= 6 ? '#fb923c' : '#f43f5e';
-  const painLabel = pain === null ? '' : pain === 0 ? 'No Pain' : pain <= 3 ? 'Mild' : pain <= 6 ? 'Moderate' : pain <= 8 ? 'Severe' : 'Unbearable';
+  const painColor = PAIN_COLOR(pain);
+  const painLabel = PAIN_LABEL(pain);
+  const streak = calcStreak(entries);
 
   const STEPS = ['Pain Level', 'Mood', 'Symptoms', 'Triggers', 'Note'];
 
@@ -66,7 +89,7 @@ export default function Journal() {
             <h1 className="j-title">How are you feeling?</h1>
           </div>
           <div className="j-streak">
-            <span className="j-streak-num">3</span>
+            <span className="j-streak-num">{streak}</span>
             <span className="j-streak-label">day streak</span>
           </div>
         </div>
@@ -273,10 +296,28 @@ export default function Journal() {
         {/* Past entries */}
         <div>
           <h2 className="j-past-title">Recent Entries</h2>
-          <div className="j-past-empty">
-            <div className="j-past-empty-icon">No entries yet</div>
-            <p>Start logging to see your history here.</p>
-          </div>
+          {entries.length === 0 ? (
+            <div className="j-past-empty">
+              <div className="j-past-empty-icon">No entries yet</div>
+              <p>Start logging to see your history here.</p>
+            </div>
+          ) : (
+            <div className="j-past-list">
+              {entries.slice(0, 5).map((e, i) => (
+                <div key={i} className="j-past-entry">
+                  <div className="j-past-pain" style={{ background: PAIN_COLOR(e.pain) }}>{e.pain ?? '—'}</div>
+                  <div className="j-past-body">
+                    <div className="j-past-top">
+                      <span className="j-past-date">{new Date(e.date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</span>
+                      {e.mood && <span className="j-past-mood">{e.mood}</span>}
+                    </div>
+                    {e.symptoms.length > 0 && <div className="j-past-tags">{e.symptoms.map(s => <span key={s} className="j-past-tag">{s}</span>)}</div>}
+                    {e.note && <p className="j-past-note">&quot;{e.note}&quot;</p>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
       </div>
