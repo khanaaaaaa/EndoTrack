@@ -326,3 +326,28 @@
   max-width: 480px;
   margin: 0 auto 1.5rem;
 }
+
+/* Empty state */
+.i-empty {
+  text-align: center;
+  padding: 3rem 2rem;
+  background: white;
+  border: 1px solid #fce4ec;
+  border-radius: 20px;
+}
+
+.i-empty-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+
+.i-empty-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #2d1b2e;
+  margin-bottom: 0.5rem;
+}
+
+.i-empty-text {
+  color: #b07a90;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  margin-bottom: 1.25rem;
+}
