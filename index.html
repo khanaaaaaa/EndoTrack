@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EndoCompass</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- HOME -->
+    <div id="home-screen" class="screen active">
+        <div class="header">
+            <h1>EndoCompass</h1>
+            <p class="sub">Are your symptoms being taken seriously?</p>
+        </div>
+        <div class="card">
+            <p class="body-text">Women with endometriosis wait an average of <strong>7–10 years</strong> for a diagnosis — not because the disease is rare, but because symptoms are routinely dismissed.</p>
+            <p class="body-text mt">This tool checks your symptoms against published clinical guidelines (ESNM, ACOG, WHO) and tells you whether your doctor's response was medically appropriate.</p>
+        </div>
+        <button class="btn-primary" onclick="navigate('symptoms')">Check My Symptoms</button>
+        <button class="btn-secondary" onclick="navigate('doctor')">Assess My Doctor's Response</button>
+        <div class="card disclaimer-card">
+            <p>Not a diagnosis. Evidence that your pain deserves investigation.</p>
+        </div>
+    </div>
+
+    <!-- SYMPTOM CHECKER -->
+    <div id="symptoms-screen" class="screen">
+        <div class="header">
+            <h1>Symptom Checker</h1>
+            <p class="sub">Based on ESNM & ACOG diagnostic criteria</p>
+        </div>
+        <div id="symptom-questions"></div>
+        <button class="btn-primary" onclick="scoreSymptoms()">See My Assessment</button>
+    </div>
+
+    <!-- SYMPTOM RESULT -->
+    <div id="symptom-result-screen" class="screen">
+        <div class="header">
+            <h1>Your Assessment</h1>
+            <p class="sub">Based on clinical diagnostic indicators</p>
+        </div>
+        <div id="symptom-result-content"></div>
+        <button class="btn-primary" onclick="navigate('doctor')">Check Doctor's Response →</button>
+        <button class="btn-secondary" onclick="navigate('symptoms')">Retake</button>
+    </div>
+
+    <!-- DOCTOR CHECKER -->
+    <div id="doctor-screen" class="screen">
+        <div class="header">
+            <h1>Doctor Response Check</h1>
+            <p class="sub">Was your doctor's response medically appropriate?</p>
+        </div>
+        <p class="section-label">Select everything your doctor said or did</p>
+        <div id="doctor-questions"></div>
+        <button class="btn-primary" onclick="scoreDoctor()">Assess Response</button>
+    </div>
+
+    <!-- DOCTOR RESULT -->
+    <div id="doctor-result-screen" class="screen">
+        <div class="header">
+            <h1>Doctor Assessment</h1>
+            <p class="sub">Measured against published clinical guidelines</p>
+        </div>
+        <div id="doctor-result-content"></div>
+        <button class="btn-primary" onclick="navigate('next')">What To Do Next →</button>
+        <button class="btn-secondary" onclick="navigate('doctor')">Retake</button>
+    </div>
+
+    <!-- NEXT STEPS -->
+    <div id="next-screen" class="screen">
+        <div class="header">
+            <h1>What To Do Next</h1>
+            <p class="sub">Your action plan based on your results</p>
+        </div>
+        <div id="next-content"></div>
+        <button class="btn-secondary" onclick="navigate('home')">← Start Over</button>
+    </div>
+
+    <!-- JOURNAL -->
+    <div id="journal-screen" class="screen">
+        <div class="header">
+            <h1>Symptom Journal</h1>
+            <p class="sub">Full log — most recent first</p>
+        </div>
+        <div id="journal-content"></div>
+    </div>
+
+    <!-- NAV -->
+    <nav class="bottom-nav">
+        <button class="nav-btn active" data-screen="home" onclick="navigate('home')">
+            <span class="nav-icon">⌂</span><span>Home</span>
+        </button>
+        <button class="nav-btn" data-screen="symptoms" onclick="navigate('symptoms')">
+            <span class="nav-icon">◉</span><span>Symptoms</span>
+        </button>
+        <button class="nav-btn" data-screen="doctor" onclick="navigate('doctor')">
+            <span class="nav-icon">⚕</span><span>Doctor</span>
+        </button>
+        <button class="nav-btn" data-screen="next" onclick="navigate('next')">
+            <span class="nav-icon">→</span><span>Next Steps</span>
+        </button>
+        <button class="nav-btn" data-screen="journal" onclick="navigate('journal')">
+            <span class="nav-icon">☰</span><span>Journal</span>
+        </button>
+    </nav>
+
+    <script src="app.js"></script>
+</body>
+</html>
