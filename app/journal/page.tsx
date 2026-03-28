@@ -30,6 +30,9 @@ export default function Journal() {
 
   const handleSubmit = () => {
     if (!note.trim()) { setError('Please add a note before saving.'); return; }
+    const entry = { date: new Date().toISOString(), pain, mood: mood !== null ? MOODS[mood] : null, symptoms, triggers, note };
+    const existing = JSON.parse(localStorage.getItem('endo_entries') || '[]');
+    localStorage.setItem('endo_entries', JSON.stringify([entry, ...existing]));
     setSubmitted(true);
     setTimeout(() => {
       setSubmitted(false);
