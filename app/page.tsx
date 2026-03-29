@@ -2,21 +2,18 @@
 import { useState, useEffect } from 'react';
 
 export default function Home() {
-  const [loading, setLoading] = useState(() => {
-    if (typeof window !== 'undefined') return !sessionStorage.getItem('splashSeen');
-    return true;
-  });
+  const [loading, setLoading] = useState(true);
   const [fadeOut, setFadeOut] = useState(false);
 
   useEffect(() => {
-    if (!loading) return;
+    if (sessionStorage.getItem('splashSeen')) { setLoading(false); return; }
     const fade = setTimeout(() => setFadeOut(true), 3200);
     const done = setTimeout(() => {
       sessionStorage.setItem('splashSeen', '1');
       setLoading(false);
     }, 3800);
     return () => { clearTimeout(fade); clearTimeout(done); };
-  }, [loading]);
+  }, []);
 
   if (loading) return <Splash fadeOut={fadeOut} />;
 
